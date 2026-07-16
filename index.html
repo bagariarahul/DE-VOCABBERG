@@ -211,6 +211,25 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 .sheet .conj .conjlab{display:block;font-size:9.5px;font-weight:600;letter-spacing:.12em;
   text-transform:uppercase;color:var(--tulip);margin-bottom:2px}
 
+.scbtn{font-family:'Archivo';font-weight:700;font-size:12.5px;letter-spacing:.01em;
+  background:var(--card);color:var(--muted);border:1.5px solid var(--line);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.scbtn:hover{border-color:var(--delft);color:var(--delft)}
+.scbtn.active{background:var(--delft);border-color:var(--delft);color:#fff}
+.overlay{position:fixed;inset:0;background:rgba(8,12,24,.6);z-index:80;
+  display:flex;align-items:center;justify-content:center;padding:18px}
+.overlay[hidden]{display:none}
+.help{background:var(--card);color:var(--ink);max-width:660px;width:100%;max-height:84vh;
+  overflow:auto;border-radius:12px;border:1.5px solid var(--line);padding:22px 26px;position:relative}
+.help h2{font-family:'Archivo';font-weight:900;font-size:21px;margin:0 0 8px;letter-spacing:-.01em}
+.help h3{font-family:'Archivo';font-weight:800;font-size:13.5px;margin:16px 0 4px;color:var(--delft);
+  letter-spacing:.04em;text-transform:uppercase}
+.help p,.help li{font-size:13.5px;line-height:1.6}
+.help ul{padding-left:18px;margin:4px 0}
+.help .close{position:absolute;top:8px;right:12px;background:none;border:none;font-size:22px;
+  color:var(--muted);cursor:pointer;line-height:1;padding:4px}
+.help a{color:var(--tulip);font-weight:600}
+.help .gh{margin-top:16px;padding:11px 13px;border:1.5px dashed var(--tulip);border-radius:8px;font-size:13.5px}
 .ten{font-family:'Inter';font-weight:500;font-size:.68em;color:var(--muted);letter-spacing:0}
 .hright{display:flex;align-items:center;gap:12px}
 .theme{background:var(--card);border:1.5px solid var(--line);border-radius:8px;
@@ -235,13 +254,15 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 <div class="wrap">
   <header>
     <div class="brand">DE VOCAB<span class="accent">BERG</span>
-      <small>1020 woorden &middot; A0 &rarr; A2 &middot; GregMat-stijl cumulatief</small>
+      <small data-i18n="brandSub">1020 woorden &middot; A0 &rarr; A2 &middot; GregMat-stijl cumulatief</small>
     </div>
     <div class="hright">
       <div class="totals">
         <div class="big"><span id="totGreen">0</span> / 1020</div>
-        <div class="sub">woorden gekend &middot; <span id="totPct">0%</span> van de berg</div>
+        <div class="sub"><span data-i18n="subTotals">woorden gekend</span> &middot; <span id="totPct">0%</span> <span data-i18n="subBerg">van de berg</span></div>
       </div>
+      <button class="theme" id="langBtn" title="Switch UI language">EN</button>
+      <button class="theme" id="helpBtn" title="Uitleg / Guide">?</button>
       <button class="theme" id="themeBtn" title="Licht / donker">&#127769;</button>
     </div>
   </header>
@@ -256,17 +277,21 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
       <button class="reset" id="resetBtn" title="Wis markeringen van deze dag">reset dag</button>
       <button class="reset" id="expBtn" title="Kopieer je voortgang als code (voor ander apparaat of back-up)">export</button>
       <button class="reset" id="impBtn" title="Plak een voortgang-code van een ander apparaat">import</button>
+      <button class="reset" id="autoBtn" title="Spreek elk woord uit bij navigeren">&#128266; auto: uit</button>
     </div>
   </div>
   <div class="routine" id="routine"></div>
   <div class="modes">
-    <button class="mbtn active" data-m="order">Op volgorde</button>
-    <button class="mbtn" data-m="sday">Schud per dag</button>
-    <button class="mbtn" data-m="sall">Alles gemengd</button>
+    <button class="scbtn active" data-sc="cum" id="scCum">Dag 1&ndash;1</button>
+    <button class="scbtn" data-sc="solo" id="scSolo">Alleen dag 1</button>
     <span class="modesep"></span>
-    <button class="fbtn active" data-f="all">Alles</button>
-    <button class="fbtn" data-f="forgot">Alleen vergeten</button>
-    <button class="fbtn" data-f="unmarked">Alleen ongemarkeerd</button>
+    <button class="mbtn active" data-m="order" data-i18n="mOrder">Op volgorde</button>
+    <button class="mbtn" data-m="sday" data-i18n="mSday">Schud per dag</button>
+    <button class="mbtn" data-m="sall" data-i18n="mSall">Alles gemengd</button>
+    <span class="modesep"></span>
+    <button class="fbtn active" data-f="all" data-i18n="fAll">Alles</button>
+    <button class="fbtn" data-f="forgot" data-i18n="fForgot">Alleen vergeten</button>
+    <button class="fbtn" data-f="unmarked" data-i18n="fUnmarked">Alleen ongemarkeerd</button>
   </div>
   <div class="storage-note" id="storageNote"></div>
   <div class="storage-note" id="ttsNote"></div>
@@ -275,15 +300,22 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 </div>
 
 <div class="legend">
-  <span class="kg"><kbd>G</kbd> gekend</span>
-  <span class="kf"><kbd>F</kbd> vergeten</span>
-  <span class="kd"><kbd>D</kbd> definitie</span>
-  <span><kbd>X</kbd> wissen</span>
-  <span><kbd>&larr;&rarr;&uarr;&darr;</kbd> navigeren</span>
-  <span><kbd>P</kbd> uitspraak</span>
-  <span><kbd>S</kbd> schudden</span>
-  <span><kbd>[</kbd><kbd>]</kbd> dag wisselen</span>
-  <span><kbd>Esc</kbd> sluiten</span>
+  <span class="kg"><kbd>G</kbd> <span data-i18n="lgKnown">gekend</span></span>
+  <span class="kf"><kbd>F</kbd> <span data-i18n="lgForgot">vergeten</span></span>
+  <span class="kd"><kbd>D</kbd> <span data-i18n="lgDef">definitie</span></span>
+  <span><kbd>X</kbd> <span data-i18n="lgClear">wissen</span></span>
+  <span><kbd>&larr;&rarr;&uarr;&darr;</kbd> <span data-i18n="lgNav">navigeren</span></span>
+  <span><kbd>P</kbd> <span data-i18n="lgSpeak">uitspraak</span></span>
+  <span><kbd>S</kbd> <span data-i18n="lgShuffle">schudden</span></span>
+  <span><kbd>[</kbd><kbd>]</kbd> <span data-i18n="lgDay">dag wisselen</span></span>
+  <span><kbd>Esc</kbd> <span data-i18n="lgEsc">sluiten</span></span>
+</div>
+
+<div class="overlay" id="helpOverlay" hidden>
+  <div class="help">
+    <button class="close" id="helpClose" aria-label="Sluiten">&times;</button>
+    <div id="helpBody"></div>
+  </div>
 </div>
 
 <div class="sheet" id="sheet" role="dialog" aria-label="Definitie">
@@ -300,6 +332,7 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
     </div>
     <div class="sheet-actions">
       <button class="sbtn x" id="btnSpeak" title="Uitspraak (P)">&#128266; P</button>
+      <button class="sbtn x" id="btnX">Wissen &middot; X</button>
       <button class="sbtn g" id="btnG">Gekend &middot; G</button>
       <button class="sbtn f" id="btnF">Vergeten &middot; F</button>
     </div>
@@ -310,13 +343,20 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 "use strict";
 const DATA = []; // populated by data chunks below
 
-/* ================= app ================= */
-let day = 0, cur = 0, mode = "order";   // order | sday | sall
-let filter = "all";                      // all | forgot | unmarked
-let marks = {};                          // "d-i" -> 1 green | 2 red
+/* ================= state ================= */
+let day = 0, cur = 0, mode = "order";        // order | sday | sall
+let filter = "all";                           // all | forgot | unmarked
+let scope = "cum";                            // cum (day 1..N) | solo (day N only)
+let lang = "nl";                              // ui language: nl | en
+let autoSpeak = false;
+let marks = {};                               // "d-i" -> 1 green | 2 red
 let mem = false, saveTimer = null;
 let VIS = [], ELS = [], SECCOUNTS = [];
 let theme = null;
+
+const $ = id => document.getElementById(id);
+const KEY = "vocabberg_v1";
+const key = (d,i) => d + "-" + i;
 
 const T_EN = [
 "survival: questions & greetings","pronouns & to be / to have","numbers 0-20 & quantity",
@@ -329,17 +369,148 @@ const T_EN = [
 "nature & animals","feelings & personality","communication & tech","connector words",
 "adverbs & degree","prepositions","kitchen & household items","Dutch life & official matters"
 ];
+
+/* ================= i18n ================= */
+const L = {
+nl:{
+  brandSub:"1020 woorden \u00b7 A0 \u2192 A2 \u00b7 GregMat-stijl cumulatief",
+  subTotals:"woorden gekend", subBerg:"van de berg",
+  day:"Dag", soloOnly:"Alleen dag",
+  mOrder:"Op volgorde", mSday:"Schud per dag", mSall:"Alles gemengd",
+  fAll:"Alles", fForgot:"Alleen vergeten", fUnmarked:"Alleen ongemarkeerd",
+  reset:"reset dag", export:"export", import:"import",
+  auto:"auto-uitspraak", on:"aan", off:"uit",
+  known2:"gekend", forgot2:"vergeten", words:"woorden",
+  neww:"nieuw", review:"herhaling", allMixed:"Alle {n} woorden \u2014 gemengd",
+  routineD1:"De berg tot hier: <b>30 woorden</b>. Morgen: dag 1 herhalen + dag 2 leren.",
+  routineCum:"De berg tot hier: <b>{tot} woorden</b> (dag 1 t/m {n}) \u2014 herhaling boven, <b>nieuwe woorden onderaan</b>.",
+  routineSolo:"Alleen dag {n}: 30 woorden. Kies '{cum}' voor de volledige klim (GregMat-stijl).",
+  knownBtn:"Gekend", forgotBtn:"Vergeten", clearBtn:"Wissen",
+  presTense:"tegenwoordige tijd",
+  lgKnown:"gekend", lgForgot:"vergeten", lgDef:"definitie", lgClear:"wissen", lgNav:"navigeren",
+  lgSpeak:"uitspraak", lgShuffle:"schudden", lgDay:"dag wisselen", lgEsc:"sluiten",
+  emptyForgot:"Geen vergeten woorden hier \u2014 mooi zo! Klim verder.",
+  emptyOther:"Geen woorden in deze weergave \u2014 pas het filter aan.",
+  noVoiceShort:"Geen Nederlandse (nl-NL) stem op dit apparaat \u2014 de uitspraak klinkt Engels. Open de ?-gids voor installatiestappen.",
+  storageNone:"Let op: opslag niet beschikbaar in deze browser - voortgang gaat verloren bij sluiten. Gebruik export/import.",
+  resetConfirm:"Markeringen van dag {n} wissen?",
+  expOk:"Voortgang gekopieerd naar het klembord! Plak de code via 'import' op je andere apparaat.",
+  expCopy:"Kopieer deze code (Ctrl/Cmd+C):",
+  impAsk:"Plak hier je voortgang-code:",
+  impOk:"Voortgang hersteld!",
+  impBad:"Ongeldige code - plak de volledige export-code."
+},
+en:{
+  brandSub:"1020 words \u00b7 A0 \u2192 A2 \u00b7 GregMat-style cumulative",
+  subTotals:"words known", subBerg:"of the mountain",
+  day:"Day", soloOnly:"Only day",
+  mOrder:"In order", mSday:"Shuffle per day", mSall:"All mixed",
+  fAll:"All", fForgot:"Forgotten only", fUnmarked:"Unmarked only",
+  reset:"reset day", export:"export", import:"import",
+  auto:"auto-speak", on:"on", off:"off",
+  known2:"known", forgot2:"forgotten", words:"words",
+  neww:"new", review:"review", allMixed:"All {n} words \u2014 mixed",
+  routineD1:"The mountain so far: <b>30 words</b>. Tomorrow: review day 1 + learn day 2.",
+  routineCum:"The mountain so far: <b>{tot} words</b> (day 1 to {n}) \u2014 review on top, <b>new words at the bottom</b>.",
+  routineSolo:"Day {n} only: 30 words. Pick '{cum}' for the full climb (GregMat style).",
+  knownBtn:"Known", forgotBtn:"Forgot", clearBtn:"Clear",
+  presTense:"present tense",
+  lgKnown:"known", lgForgot:"forgot", lgDef:"definition", lgClear:"clear", lgNav:"navigate",
+  lgSpeak:"pronounce", lgShuffle:"shuffle", lgDay:"switch day", lgEsc:"close",
+  emptyForgot:"No forgotten words here \u2014 nice! Keep climbing.",
+  emptyOther:"No words in this view \u2014 adjust the filter.",
+  noVoiceShort:"There is no Dutch (nl-NL) voice on this device \u2014 pronunciation will sound English. Open the ? guide for install steps.",
+  storageNone:"Note: storage unavailable in this browser - progress is lost on close. Use export/import.",
+  resetConfirm:"Clear all marks for day {n}?",
+  expOk:"Progress copied to clipboard! Paste it via 'import' on your other device.",
+  expCopy:"Copy this code (Ctrl/Cmd+C):",
+  impAsk:"Paste your progress code here:",
+  impOk:"Progress restored!",
+  impBad:"Invalid code - paste the full export code."
+}};
+const t = k => (L[lang] && L[lang][k]) || L.nl[k] || k;
+const fmt = (k, vars) => {
+  let s = t(k);
+  for(const v in vars) s = s.split("{"+v+"}").join(vars[v]);
+  return s;
+};
+
+const HELP = {
+nl: `<h2>De Vocabberg \u2014 gids</h2>
+<h3>De bergroutine (GregMat-stijl)</h3>
+<p>Elke dag = <b>30 nieuwe woorden</b>. Op dag N herhaal je eerst dag 1 t/m N\u22121 en leer je daarna de 30 nieuwe. Dus: dag 2 = dag 1 herhalen + dag 2 leren (60 woorden), dag 3 = dag 1\u20132 herhalen + dag 3 leren (90 woorden), enzovoort \u2014 tot 1020 op dag 34. Met de knoppen linksboven kies je <b>Dag 1\u2013N</b> (de volledige klim) of <b>Alleen dag N</b> (alleen de nieuwe 30).</p>
+<h3>Sneltoetsen</h3>
+<ul>
+<li><kbd>G</kbd> gekend (groen) \u00b7 <kbd>F</kbd> vergeten (rood) \u00b7 <kbd>X</kbd> wissen</li>
+<li><kbd>D</kbd> of <kbd>Enter</kbd> definitie \u00b7 <kbd>P</kbd> uitspraak \u00b7 <kbd>S</kbd> schudden</li>
+<li>Pijltjes: navigeren \u00b7 <kbd>[</kbd> <kbd>]</kbd> dag wisselen \u00b7 <kbd>Esc</kbd> sluiten</li>
+</ul>
+<h3>Weergaven & filters</h3>
+<p><b>Op volgorde</b> = originele volgorde. <b>Schud per dag</b> = secties blijven (30-30-30) maar elk gehusseld. <b>Alles gemengd</b> = alles door elkaar; het kaartje toont dan dag.nummer (bijv. 2.14). Filter <b>Alleen vergeten</b> om alleen je rode woorden te drillen; leeg = alles gekend.</p>
+<h3>de / het</h3>
+<p><b style="color:var(--delft)">de</b>-woorden zijn blauw, <b style="color:var(--tulip)">het</b>-woorden oranje. Leer het lidwoord altijd mee \u2014 dat is het halve werk in het Nederlands.</p>
+<h3>Werkwoorden</h3>
+<p>Open de definitie (D) van een werkwoord en je ziet de tegenwoordige tijd: ik woon \u00b7 jij woont \u00b7 hij woont \u00b7 wij wonen. Scheidbare werkwoorden worden gesplitst getoond (ik sta op).</p>
+<h3>Uitspraak</h3>
+<p>Druk op <kbd>P</kbd> of \ud83d\udd0a. Zie je <b>"There is no Dutch (nl-NL) voice on this device"</b>? Dan heeft je apparaat geen Nederlandse stem en leest een Engelse stem voor ('goodie morgan', zonder harde g). Installeren:</p>
+<ul>
+<li><b>Windows</b>: Instellingen \u2192 Tijd en taal \u2192 Spraak \u2192 Stemmen toevoegen \u2192 Nederlands</li>
+<li><b>Android</b>: Instellingen \u2192 Tekst-naar-spraak \u2192 Google Speech \u2192 Nederlands downloaden</li>
+<li><b>iOS/Mac</b>: Instellingen \u2192 Toegankelijkheid \u2192 Gesproken materiaal \u2192 Stemmen \u2192 Nederlands</li>
+<li><b>Chrome desktop</b> (online) heeft vaak al 'Google Nederlands'</li>
+</ul>
+<h3>Voortgang</h3>
+<p>Wordt automatisch opgeslagen in deze browser. <b>export</b> kopieert je voortgang als code; <b>import</b> plakt die op een ander apparaat.</p>
+<div class="gh">Gemaakt door <b>Rahul Bagaria</b>. Handig? Geef het project een \u2b50 op <a href="https://github.com/bagariarahul/DE-VOCABBERG" target="_blank" rel="noopener">GitHub</a> \u2014 dat steunt mij enorm!</div>`,
+en: `<h2>De Vocabberg \u2014 guide</h2>
+<h3>The mountain routine (GregMat style)</h3>
+<p>Every day = <b>30 new words</b>. On day N you first review days 1 to N\u22121, then learn the 30 new ones. So: day 2 = review day 1 + learn day 2 (60 words), day 3 = review days 1\u20132 + learn day 3 (90 words), and so on \u2014 up to 1020 on day 34. Use the buttons top-left to pick <b>Day 1\u2013N</b> (the full climb) or <b>Only day N</b> (just the new 30).</p>
+<h3>Keyboard shortcuts</h3>
+<ul>
+<li><kbd>G</kbd> known (green) \u00b7 <kbd>F</kbd> forgot (red) \u00b7 <kbd>X</kbd> clear</li>
+<li><kbd>D</kbd> or <kbd>Enter</kbd> definition \u00b7 <kbd>P</kbd> pronounce \u00b7 <kbd>S</kbd> shuffle</li>
+<li>Arrow keys: navigate \u00b7 <kbd>[</kbd> <kbd>]</kbd> switch day \u00b7 <kbd>Esc</kbd> close</li>
+</ul>
+<h3>Views & filters</h3>
+<p><b>In order</b> = original order. <b>Shuffle per day</b> = sections stay (30-30-30) but each is shuffled. <b>All mixed</b> = everything mixed; cards then show day.number (e.g. 2.14). Filter <b>Forgotten only</b> to drill just your red words; empty = you know them all.</p>
+<h3>de / het</h3>
+<p><b style="color:var(--delft)">de</b>-words are blue, <b style="color:var(--tulip)">het</b>-words are orange. Always learn the article with the noun \u2014 it is half the battle in Dutch.</p>
+<h3>Verbs</h3>
+<p>Open a verb's definition (D) to see the present tense: ik woon \u00b7 jij woont \u00b7 hij woont \u00b7 wij wonen. Separable verbs are shown split (ik sta op).</p>
+<h3>Pronunciation</h3>
+<p>Press <kbd>P</kbd> or \ud83d\udd0a. Seeing <b>"There is no Dutch (nl-NL) voice on this device"</b>? Your device has no Dutch voice, so an English voice reads the words ('goodie morgan', no hard g). To install one:</p>
+<ul>
+<li><b>Windows</b>: Settings \u2192 Time & Language \u2192 Speech \u2192 Add voices \u2192 Dutch</li>
+<li><b>Android</b>: Settings \u2192 Text-to-speech \u2192 Google Speech \u2192 download Dutch</li>
+<li><b>iOS/Mac</b>: Settings \u2192 Accessibility \u2192 Spoken Content \u2192 Voices \u2192 Dutch</li>
+<li><b>Desktop Chrome</b> (online) usually already has 'Google Nederlands'</li>
+</ul>
+<h3>Progress</h3>
+<p>Saved automatically in this browser. <b>export</b> copies your progress as a code; <b>import</b> pastes it on another device.</p>
+<div class="gh">Built by <b>Rahul Bagaria</b>. Finding this useful? Star the repo on <a href="https://github.com/bagariarahul/DE-VOCABBERG" target="_blank" rel="noopener">GitHub</a> \u2014 it really supports me! \u2b50</div>`
+};
+
+function applyLang(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  $("btnG").innerHTML = t("knownBtn")+" &middot; G";
+  $("btnF").innerHTML = t("forgotBtn")+" &middot; F";
+  $("btnX").innerHTML = t("clearBtn")+" &middot; X";
+  $("expBtn").textContent = t("export");
+  $("impBtn").textContent = t("import");
+  $("autoBtn").innerHTML = "&#128266; "+t("auto")+": "+(autoSpeak ? t("on") : t("off"));
+  $("langBtn").textContent = lang==="nl" ? "EN" : "NL";
+  $("helpBody").innerHTML = HELP[lang];
+  if(mem){ $("storageNote").textContent = t("storageNone"); }
+}
+
+/* ================= theme ================= */
 function applyTheme(){
   document.documentElement.dataset.theme = theme==="dark" ? "dark" : "";
   const b = $("themeBtn");
   if(b) b.innerHTML = theme==="dark" ? "&#9728;&#65039;" : "&#127769;";
 }
 
-const $ = id => document.getElementById(id);
-const KEY = "vocabberg_v1";
-const key = (d,i) => d + "-" + i;
-
-/* ---------- storage ---------- */
+/* ================= storage: artifact -> localStorage -> memory ================= */
 function lsOK(){
   try{ localStorage.setItem("__vb_t","1"); localStorage.removeItem("__vb_t"); return true; }
   catch(e){ return false; }
@@ -349,8 +520,11 @@ function applyState(s){
   marks = s.marks || {};
   day = Math.min(s.day || 0, DATA.length-1);
   if(s.theme) theme = s.theme;
+  if(s.lang) lang = s.lang;
+  if(s.scope) scope = s.scope;
+  if(typeof s.autoSpeak === "boolean") autoSpeak = s.autoSpeak;
 }
-function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme}); }
+function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak}); }
 async function load(){
   try{
     if(backend==="artifact"){
@@ -359,16 +533,11 @@ async function load(){
     } else if(backend==="local"){
       const r = localStorage.getItem(KEY);
       if(r) applyState(JSON.parse(r));
-    } else {
-      mem = true;
-    }
+    } else { mem = true; }
   }catch(e){ /* key not found is fine */ }
   if(!theme) theme = (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
   applyTheme();
-  $("storageNote").textContent = mem
-    ? "Let op: opslag niet beschikbaar in deze browser - voortgang gaat verloren bij sluiten. Gebruik export/import."
-    : "";
-  if(mem) $("storageNote").classList.add("err");
+  if(mem){ $("storageNote").textContent = t("storageNone"); $("storageNote").classList.add("err"); }
 }
 function save(){
   if(backend==="none") return;
@@ -381,7 +550,7 @@ function save(){
   }, 350);
 }
 
-/* ---------- conjugation (tegenwoordige tijd) ---------- */
+/* ================= conjugation (tegenwoordige tijd) ================= */
 const isV = c => "aeiou".includes(c);
 const IRR = {
   zijn:["ben","bent","is"], hebben:["heb","hebt","heeft"], kunnen:["kan","kunt","kan"],
@@ -409,19 +578,19 @@ function stem(inf){
   let s = inf.slice(0,-2);
   const n = s.length;
   if(n>=2 && s[n-1]===s[n-2] && !isV(s[n-1])){
-    s = s.slice(0,-1);                                   // zitten -> zit
+    s = s.slice(0,-1);
   } else if(n>=2 && !isV(s[n-1]) && s[n-1]!=="w" && isV(s[n-2]) && s[n-2]!=="i" && (n<3 || !isV(s[n-3]))){
-    s = s.slice(0,n-1) + s[n-2] + s[n-1];                // wonen -> woon
+    s = s.slice(0,n-1) + s[n-2] + s[n-1];
   }
-  if(s.endsWith("v")) s = s.slice(0,-1)+"f";             // geven -> geef
-  if(s.endsWith("z")) s = s.slice(0,-1)+"s";             // lezen -> lees
+  if(s.endsWith("v")) s = s.slice(0,-1)+"f";
+  if(s.endsWith("z")) s = s.slice(0,-1)+"s";
   return s;
 }
 function parts(inf){
   if(IRR[inf]) return IRR[inf];
   const s = stem(inf);
-  const t = s + (s.endsWith("t") ? "" : "t");
-  return [s,t,t];
+  const tt = s + (s.endsWith("t") ? "" : "t");
+  return [s,tt,tt];
 }
 function conjLine(nl,pos){
   if(pos !== "werkwoord") return "";
@@ -436,11 +605,59 @@ function conjLine(nl,pos){
   return "ik "+p[0]+" \u00b7 jij/u "+p[1]+" \u00b7 hij/zij "+p[2]+" \u00b7 wij/jullie/zij "+nl;
 }
 
-/* ---------- stats ---------- */
+/* ================= pronunciation ================= */
+let NLVOICE = null;
+function pickVoice(){
+  if(!window.speechSynthesis) return;
+  const vs = speechSynthesis.getVoices();
+  NLVOICE = vs.find(v=> /nl[-_]NL/i.test(v.lang))
+         || vs.find(v=> v.lang && v.lang.toLowerCase().startsWith("nl"))
+         || vs.find(v=> /nederlands|dutch/i.test(v.name))
+         || null;
+}
+if(window.speechSynthesis){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function cleanSpeech(t){
+  return t
+    .replace(/\(.*?\)/g, " ")
+    .replace(/\s*\/\s*/g, ", ")
+    .replace(/\s+/g, " ").trim();
+}
+function speak(txt, retried){
+  try{
+    if(!window.speechSynthesis || !txt) return;
+    if(speechSynthesis.getVoices().length===0 && !retried){
+      setTimeout(()=>{ pickVoice(); speak(txt, true); }, 300);
+      return;
+    }
+    if(!NLVOICE) pickVoice();
+    const u = new SpeechSynthesisUtterance(cleanSpeech(txt));
+    u.lang = "nl-NL";
+    u.rate = 0.85;
+    if(NLVOICE){
+      u.voice = NLVOICE;
+      $("ttsNote").textContent = "";
+      $("ttsNote").classList.remove("err");
+    } else {
+      $("ttsNote").textContent = t("noVoiceShort");
+      $("ttsNote").classList.add("err");
+    }
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){ /* no voice available */ }
+}
+function speakCur(){
+  const it = VIS[cur];
+  if(it) speak(DATA[it.d].w[it.i][0]);
+}
+
+/* ================= stats ================= */
 function totalGreen(){
-  let t=0;
-  for(const k in marks) if(marks[k]===1) t++;
-  return t;
+  let n=0;
+  for(const k in marks) if(marks[k]===1) n++;
+  return n;
 }
 function dayGreen(d){
   let g=0;
@@ -448,7 +665,7 @@ function dayGreen(d){
   return g;
 }
 
-/* ---------- mountain strip ---------- */
+/* ================= mountain strip ================= */
 function renderMountain(){
   const n = DATA.length;
   const el = $("mountain");
@@ -462,7 +679,7 @@ function renderMountain(){
       '<div class="bar" style="height:'+h+'px">' +
         '<div class="fill'+(g<30?" partial":"")+'" style="height:'+Math.round(g/30*100)+'%"></div>' +
       '</div>' +
-      '<span class="lbl">Dag '+(d+1)+'</span>' +
+      '<span class="lbl">'+t("day")+' '+(d+1)+'</span>' +
       '<span class="cnt">'+g+'/30</span>';
     b.onclick = ()=>{ setDay(d); };
     el.appendChild(b);
@@ -471,7 +688,7 @@ function renderMountain(){
   if(act) act.scrollIntoView({inline:"center", block:"nearest"});
 }
 
-/* ---------- cumulative view ---------- */
+/* ================= cumulative view ================= */
 function shuffleArr(a){
   for(let i=a.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
@@ -485,16 +702,17 @@ function passFilter(it){
   if(filter==="unmarked") return m===undefined;
   return true;
 }
+function startDay(){ return scope==="solo" ? day : 0; }
 function buildSections(){
   if(mode==="sall"){
     const all=[];
-    for(let d=0;d<=day;d++) DATA[d].w.forEach((w,i)=>all.push({d:d,i:i}));
+    for(let d=startDay();d<=day;d++) DATA[d].w.forEach((w,i)=>all.push({d:d,i:i}));
     const kept = all.filter(passFilter);
     shuffleArr(kept);
     return kept.length ? [{d:null, items:kept}] : [];
   }
   const secs=[];
-  for(let d=0;d<=day;d++){
+  for(let d=startDay();d<=day;d++){
     let idx = DATA[d].w.map((w,i)=>i).filter(i=>passFilter({d:d,i:i}));
     if(!idx.length) continue;
     if(mode==="sday") shuffleArr(idx);
@@ -517,13 +735,13 @@ function renderGrid(){
     const h = document.createElement("div");
     h.className = "secthead";
     if(sec.d===null){
-      h.innerHTML = '<span class="sectt">Alle '+sec.items.length+' woorden \u2014 gemengd</span>' +
-        '<span class="badge mix">dag 1\u2013'+(day+1)+'</span><span class="seccnt"></span>';
+      h.innerHTML = '<span class="sectt">'+fmt("allMixed",{n:sec.items.length})+'</span>' +
+        '<span class="badge mix">'+t("day").toLowerCase()+' '+(startDay()+1)+'\u2013'+(day+1)+'</span><span class="seccnt"></span>';
     } else {
       const tag = sec.d===day
-        ? '<span class="badge new">nieuw</span>'
-        : '<span class="badge rev">herhaling</span>';
-      h.innerHTML = '<span class="sectt">Dag '+(sec.d+1)+' \u2014 '+DATA[sec.d].t+' <span class="ten">('+T_EN[sec.d]+')</span></span>'+tag+'<span class="seccnt"></span>';
+        ? '<span class="badge new">'+t("neww")+'</span>'
+        : '<span class="badge rev">'+t("review")+'</span>';
+      h.innerHTML = '<span class="sectt">'+t("day")+' '+(sec.d+1)+' \u2014 '+DATA[sec.d].t+' <span class="ten">('+T_EN[sec.d]+')</span></span>'+tag+'<span class="seccnt"></span>';
     }
     s.appendChild(h);
     const grid = document.createElement("div");
@@ -539,7 +757,7 @@ function renderGrid(){
       c.innerHTML = '<span class="idx">'+tagNo+'</span>' +
         (p[0] ? '<span class="art '+p[0]+'">'+p[0]+'</span>' : '<span class="art">&nbsp;</span>') +
         p[1];
-      c.onclick = ()=>{ cur = v; syncCursor(); openSheet(); };
+      c.onclick = ()=>{ go(v); openSheet(); };
       ELS.push(c);
       grid.appendChild(c);
     });
@@ -548,9 +766,7 @@ function renderGrid(){
     SECCOUNTS.push({el: h.querySelector(".seccnt"), items: sec.items});
   });
   if(!VIS.length){
-    root.innerHTML = '<div class="empty">'+(filter==="forgot"
-      ? "Geen vergeten woorden hier &mdash; mooi zo! Klim verder."
-      : "Geen woorden in deze weergave &mdash; pas het filter aan.")+'</div>';
+    root.innerHTML = '<div class="empty">'+(filter==="forgot" ? t("emptyForgot") : t("emptyOther"))+'</div>';
   }
   if(cur >= VIS.length) cur = 0;
   syncAllMarks();
@@ -568,15 +784,15 @@ function syncAllMarks(){
       const m = marks[key(it.d,it.i)];
       if(m===1) g++; else if(m===2) r++;
     });
-    sc.el.textContent = g+" \u2713 \u00b7 "+r+" \u2717 \u00b7 "+sc.items.length+" woorden";
+    sc.el.textContent = g+" \u2713 \u00b7 "+r+" \u2717 \u00b7 "+sc.items.length+" "+t("words");
   });
   let g=0,r=0;
   VIS.forEach(it=>{
     const m = marks[key(it.d,it.i)];
     if(m===1) g++; else if(m===2) r++;
   });
-  $("dayG").textContent = g+" gekend";
-  $("dayR").textContent = r+" vergeten";
+  $("dayG").textContent = g+" "+t("known2");
+  $("dayR").textContent = r+" "+t("forgot2");
   const tg = totalGreen();
   $("totGreen").textContent = tg;
   $("totPct").textContent = Math.round(tg/1020*100)+"%";
@@ -586,105 +802,95 @@ function syncCursor(scroll=true){
   if(scroll && ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
   if(sheetOpen) fillSheet();
 }
+function go(v){
+  cur = v;
+  syncCursor();
+  if(autoSpeak) speakCur();
+}
 
 function setDay(d){
   day = Math.max(0, Math.min(DATA.length-1, d));
   cur = 0;
   closeSheet();
   const tot = (day+1)*30;
-  $("dayTitle").innerHTML = "Dag " + (day+1) + " \u2014 <em>" + DATA[day].t + "</em> <span class=\"ten\">(" + T_EN[day] + ")</span>";
-  $("routine").innerHTML = day===0
-    ? "De berg tot hier: <b>30 woorden</b>. Morgen: dag 1 herhalen + dag 2 leren."
-    : "De berg tot hier: <b>"+tot+" woorden</b> (dag 1 t/m "+(day+1)+") \u2014 herhaling boven, <b>nieuwe woorden onderaan</b>.";
-  $("resetBtn").textContent = "reset dag "+(day+1);
+  $("dayTitle").innerHTML = t("day")+" "+(day+1)+" \u2014 <em>"+DATA[day].t+"</em> <span class=\"ten\">("+T_EN[day]+")</span>";
+  const cumLbl = t("day")+" 1\u2013"+(day+1);
+  $("scCum").textContent = cumLbl;
+  $("scSolo").textContent = t("soloOnly")+" "+(day+1);
+  if(scope==="solo"){
+    $("routine").innerHTML = fmt("routineSolo",{n:day+1, cum:cumLbl});
+  } else if(day===0){
+    $("routine").innerHTML = t("routineD1");
+  } else {
+    $("routine").innerHTML = fmt("routineCum",{tot:tot, n:day+1});
+  }
+  $("resetBtn").textContent = t("reset")+" "+(day+1);
   renderGrid();
   renderMountain();
   save();
 }
 function setMode(m){
-  mode = m;
-  cur = 0;
-  closeSheet();
+  mode = m; cur = 0; closeSheet();
   document.querySelectorAll(".mbtn").forEach(b=> b.classList.toggle("active", b.dataset.m===mode));
   renderGrid();
 }
 function setFilter(f){
-  filter = f;
-  cur = 0;
-  closeSheet();
+  filter = f; cur = 0; closeSheet();
   document.querySelectorAll(".fbtn").forEach(b=> b.classList.toggle("active", b.dataset.f===filter));
   renderGrid();
 }
+function setScope(sc){
+  scope = sc; cur = 0; closeSheet();
+  document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
+  setDay(day);
+  save();
+}
 
-/* ---------- pronunciation (Web Speech, nl-NL) ---------- */
-let NLVOICE = null, ttsWarned = false;
-function pickVoice(){
-  if(!window.speechSynthesis) return;
-  const vs = speechSynthesis.getVoices();
-  NLVOICE = vs.find(v=> /nl[-_]NL/i.test(v.lang))
-         || vs.find(v=> v.lang && v.lang.toLowerCase().startsWith("nl"))
-         || vs.find(v=> /nederlands|dutch/i.test(v.name))
-         || null;
-}
-if(window.speechSynthesis){
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-}
-function cleanSpeech(t){
-  return t
-    .replace(/\(.*?\)/g, " ")        // drop "(mv.)" etc.
-    .replace(/\s*\/\s*/g, ", ")      // "jij / je" -> "jij, je"
-    .replace(/\s+/g, " ").trim();
-}
-function speak(txt, retried){
-  try{
-    if(!window.speechSynthesis || !txt) return;
-    if(speechSynthesis.getVoices().length===0 && !retried){
-      // voice list loads async on many browsers; wait once, then speak
-      setTimeout(()=>{ pickVoice(); speak(txt, true); }, 300);
-      return;
-    }
-    if(!NLVOICE) pickVoice();
-    const u = new SpeechSynthesisUtterance(cleanSpeech(txt));
-    u.lang = "nl-NL";
-    u.rate = 0.85;
-    if(NLVOICE){
-      u.voice = NLVOICE;
-      $("ttsNote").textContent = "";
-      $("ttsNote").classList.remove("err");
-    } else {
-      $("ttsNote").textContent = "Geen Nederlandse (nl-NL) stem op dit apparaat - een Engelse stem leest nu voor, daarom klinkt het als 'goodie morgan' zonder harde g. Installeer een Nederlandse stem: Windows: Instellingen > Tijd en taal > Spraak > Stemmen toevoegen > Nederlands. Android: Instellingen > Tekst-naar-spraak > Google Speech > Nederlands downloaden. iOS/Mac: Instellingen > Toegankelijkheid > Gesproken materiaal > Stemmen > Nederlands. Chrome desktop (online) heeft vaak al 'Google Nederlands'.";
-      $("ttsNote").classList.add("err");
-    }
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  }catch(e){ /* no voice available */ }
-}
-let lastExNL = "";
-
-/* ---------- sheet ---------- */
+/* ================= sheet ================= */
 let sheetOpen = false;
+let lastExNL = "";
+function updateSheetPad(){
+  document.body.style.paddingBottom = sheetOpen ? ($("sheet").offsetHeight + 28) + "px" : "";
+}
 function fillSheet(){
   const it = VIS[cur];
   if(!it) return;
   const w = DATA[it.d].w[it.i];
   $("shWord").textContent = w[0];
-  $("shPos").textContent = w[2] + " \u00b7 dag " + (it.d+1);
+  $("shPos").textContent = w[2] + " \u00b7 " + t("day").toLowerCase() + " " + (it.d+1);
   $("shEn").textContent = w[1];
   const ex = w[3] || "";
   const sp = ex.split(" = ");
   lastExNL = sp.length===2 ? sp[0] : "";
   $("shEx").innerHTML = sp.length===2 ? "<b>"+sp[0]+"</b><br>"+sp[1] : ex;
-  $("shEx").title = lastExNL ? "Klik om de zin te horen" : "";
+  $("shEx").title = lastExNL ? "Klik om de zin te horen / click to hear" : "";
   const cl = conjLine(w[0], w[2]);
-  $("shConj").innerHTML = cl ? '<span class="conjlab">tegenwoordige tijd</span>'+cl : "";
+  $("shConj").innerHTML = cl ? '<span class="conjlab">'+t("presTense")+'</span>'+cl : "";
   $("shConj").style.display = cl ? "" : "none";
+  if(sheetOpen) requestAnimationFrame(updateSheetPad);
 }
-function openSheet(){ fillSheet(); $("sheet").classList.add("open"); sheetOpen = true; }
-function closeSheet(){ $("sheet").classList.remove("open"); sheetOpen = false; }
+function openSheet(){
+  fillSheet();
+  $("sheet").classList.add("open");
+  sheetOpen = true;
+  requestAnimationFrame(()=>{
+    updateSheetPad();
+    if(ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
+  });
+}
+function closeSheet(){
+  $("sheet").classList.remove("open");
+  sheetOpen = false;
+  updateSheetPad();
+}
 function toggleSheet(){ sheetOpen ? closeSheet() : openSheet(); }
 
-/* ---------- actions ---------- */
+/* ================= help ================= */
+let helpOpen = false;
+function openHelp(){ $("helpOverlay").hidden = false; helpOpen = true; }
+function closeHelp(){ $("helpOverlay").hidden = true; helpOpen = false; }
+
+/* ================= actions ================= */
 function mark(v){
   const it = VIS[cur];
   if(!it) return;
@@ -695,7 +901,7 @@ function mark(v){
   save();
   if(v!==0){
     closeSheet();
-    if(cur < VIS.length-1){ cur++; syncCursor(); }
+    if(cur < VIS.length-1) go(cur+1);
   }
 }
 function cols(){
@@ -706,21 +912,25 @@ function cols(){
 
 document.addEventListener("keydown", e=>{
   if(e.metaKey || e.ctrlKey || e.altKey) return;
+  if(helpOpen){
+    if(e.key==="Escape") closeHelp();
+    return;
+  }
   const n = VIS.length;
-  if(!n) return;
+  if(!n && e.key.toLowerCase()!=="[" && e.key.toLowerCase()!=="]") return;
   switch(e.key.toLowerCase()){
     case "g": mark(1); break;
     case "f": mark(2); break;
     case "x": mark(0); break;
     case "d": toggleSheet(); break;
-    case "s": setMode(mode==="order" ? "sday" : mode); break;   // (re)shuffle
-    case "p": { const it=VIS[cur]; if(it) speak(DATA[it.d].w[it.i][0]); break; }
+    case "s": setMode(mode==="order" ? "sday" : mode); break;
+    case "p": speakCur(); break;
     case "enter": toggleSheet(); e.preventDefault(); break;
     case "escape": closeSheet(); break;
-    case "arrowright": case "l": cur=(cur+1)%n; syncCursor(); e.preventDefault(); break;
-    case "arrowleft": case "h": cur=(cur-1+n)%n; syncCursor(); e.preventDefault(); break;
-    case "arrowdown": case "j": cur=Math.min(n-1,cur+cols()); syncCursor(); e.preventDefault(); break;
-    case "arrowup": case "k": cur=Math.max(0,cur-cols()); syncCursor(); e.preventDefault(); break;
+    case "arrowright": case "l": go((cur+1)%n); e.preventDefault(); break;
+    case "arrowleft": case "h": go((cur-1+n)%n); e.preventDefault(); break;
+    case "arrowdown": case "j": go(Math.min(n-1,cur+cols())); e.preventDefault(); break;
+    case "arrowup": case "k": go(Math.max(0,cur-cols())); e.preventDefault(); break;
     case "[": setDay(day-1); break;
     case "]": setDay(day+1); break;
   }
@@ -728,46 +938,59 @@ document.addEventListener("keydown", e=>{
 
 $("btnG").onclick = ()=>mark(1);
 $("btnF").onclick = ()=>mark(2);
+$("btnX").onclick = ()=>mark(0);
+$("btnSpeak").onclick = speakCur;
 $("sheetClose").onclick = closeSheet;
+$("shEx").onclick = ()=>{ if(lastExNL) speak(lastExNL); };
 $("resetBtn").onclick = ()=>{
-  if(!confirm("Markeringen van dag "+(day+1)+" wissen?")) return;
+  if(!confirm(fmt("resetConfirm",{n:day+1}))) return;
   DATA[day].w.forEach((w,i)=> delete marks[key(day,i)]);
   syncAllMarks(); renderMountain(); save();
 };
-document.querySelectorAll(".mbtn").forEach(b=>{
-  b.onclick = ()=> setMode(b.dataset.m);
-});
-document.querySelectorAll(".fbtn").forEach(b=>{
-  b.onclick = ()=> setFilter(b.dataset.f);
-});
-$("btnSpeak").onclick = ()=>{ const it=VIS[cur]; if(it) speak(DATA[it.d].w[it.i][0]); };
-$("shEx").onclick = ()=>{ if(lastExNL) speak(lastExNL); };
-$("themeBtn").onclick = ()=>{ theme = theme==="dark" ? "light" : "dark"; applyTheme(); save(); };
 $("expBtn").onclick = async ()=>{
   const code = snapshot();
-  try{
-    await navigator.clipboard.writeText(code);
-    alert("Voortgang gekopieerd naar het klembord! Plak de code via 'import' op je andere apparaat.");
-  }catch(e){
-    prompt("Kopieer deze code (Ctrl/Cmd+C):", code);
-  }
+  try{ await navigator.clipboard.writeText(code); alert(t("expOk")); }
+  catch(e){ prompt(t("expCopy"), code); }
 };
 $("impBtn").onclick = ()=>{
-  const t = prompt("Plak hier je voortgang-code:");
-  if(!t) return;
+  const txt = prompt(t("impAsk"));
+  if(!txt) return;
   try{
-    const s = JSON.parse(t);
+    const s = JSON.parse(txt);
     if(!s || typeof s !== "object" || !s.marks) throw 0;
     applyState(s);
-    applyTheme();
+    applyTheme(); applyLang();
+    document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
     setDay(day);
     save();
-    alert("Voortgang hersteld!");
-  }catch(e){ alert("Ongeldige code - plak de volledige export-code."); }
+    alert(t("impOk"));
+  }catch(e){ alert(t("impBad")); }
 };
+$("autoBtn").onclick = ()=>{
+  autoSpeak = !autoSpeak;
+  applyLang();
+  save();
+  if(autoSpeak) speakCur();
+};
+$("themeBtn").onclick = ()=>{ theme = theme==="dark" ? "light" : "dark"; applyTheme(); save(); };
+$("langBtn").onclick = ()=>{
+  lang = lang==="nl" ? "en" : "nl";
+  applyLang();
+  document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
+  setDay(day);
+  save();
+};
+$("helpBtn").onclick = openHelp;
+$("helpClose").onclick = closeHelp;
+$("helpOverlay").onclick = e=>{ if(e.target===$("helpOverlay")) closeHelp(); };
+document.querySelectorAll(".mbtn").forEach(b=>{ b.onclick = ()=> setMode(b.dataset.m); });
+document.querySelectorAll(".fbtn").forEach(b=>{ b.onclick = ()=> setFilter(b.dataset.f); });
+document.querySelectorAll(".scbtn").forEach(b=>{ b.onclick = ()=> setScope(b.dataset.sc); });
 
 async function init(){
   await load();
+  applyLang();
+  document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
   setDay(day);
 }
 </script>
