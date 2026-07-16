@@ -133,6 +133,7 @@ header{
 .card.r .idx{color:var(--red)}
 body:not(.show-idx) .card .idx{display:none}
 .card:not(.g):not(.r):hover{border-color:var(--delft)}
+.card{scroll-margin-bottom:var(--sheetpad,0px);scroll-margin-top:6px}
 
 /* ---------- popup / bottom sheet ---------- */
 .sheet{
@@ -251,9 +252,19 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 @media (max-width:640px){
   .grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:6px}
   .card{font-size:14px;padding:11px 6px 10px}
-  .sheet-inner{gap:10px}
-  .sheet-actions{margin-left:0;width:100%}
-  .sbtn{flex:1;text-align:center}
+  .sheet{padding:13px 16px calc(12px + env(safe-area-inset-bottom));max-height:72vh;overflow:auto}
+  .sheet-inner{gap:8px}
+  .sheet .word{font-size:24px;min-width:0}
+  .sheet .pos{margin-top:5px}
+  .sheet .en{font-size:16px}
+  .sheet .ex{font-size:13px}
+  .sheet .conj{font-size:12px;margin-top:8px;padding-top:6px}
+  .sheet-actions{margin-left:0;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #btnG{order:1}
+  #btnF{order:2}
+  #btnSpeak{order:3}
+  #btnX{order:4}
+  .sbtn{text-align:center;padding:11px 10px}
   .legend{display:none}
 }
 @media (prefers-reduced-motion:no-preference){
@@ -873,8 +884,17 @@ function setScope(sc){
 let sheetOpen = false;
 let lastExNL = "";
 function updateSheetPad(){
-  document.body.style.paddingBottom = sheetOpen ? ($("sheet").offsetHeight + 28) + "px" : "";
+  const wrap = document.querySelector(".wrap");
+  if(sheetOpen){
+    const h = $("sheet").offsetHeight;
+    wrap.style.paddingBottom = (h + 28) + "px";
+    document.documentElement.style.setProperty("--sheetpad", (h + 16) + "px");
+  } else {
+    wrap.style.paddingBottom = "";
+    document.documentElement.style.setProperty("--sheetpad", "0px");
+  }
 }
+window.addEventListener("resize", ()=>{ if(sheetOpen) updateSheetPad(); });
 function fillSheet(){
   const it = VIS[cur];
   if(!it) return;
