@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De Vocabberg — 1020 woorden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F8F5;
+  --ink:#0F2557;      /* delft deep */
+  --delft:#1F4FA3;    /* delft blue */
+  --tulip:#E8590C;    /* orange accent */
+  --green:#2B8A3E;
+  --green-bg:#E3F5E7;
+  --red:#C92A2A;
+  --red-bg:#FBEAEA;
+  --line:#D8DCE6;
+  --muted:#5C6577;
+  --card:#FFFFFF;
+  --sheetbg:#0F2557;
+  --activebg:#0F2557;
+  --activefg:#FFFFFF;
+  --legbg:rgba(247,248,245,.92);
+}
+[data-theme="dark"]{
+  --paper:#0E1220;
+  --ink:#E9EEF8;
+  --delft:#7FA3EF;
+  --tulip:#FF8A3D;
+  --green:#57C377;
+  --green-bg:#17301F;
+  --red:#E36868;
+  --red-bg:#361D1C;
+  --line:#2A3450;
+  --muted:#93A0BC;
+  --card:#161D31;
+  --sheetbg:#0A0F1E;
+  --activebg:#E9EEF8;
+  --activefg:#0E1220;
+  --legbg:rgba(14,18,32,.9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:15px;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 120px}
+
+/* ---------- header ---------- */
+header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+  padding:22px 0 10px;
+  border-bottom:3px solid var(--ink);
+}
+.brand{font-family:'Archivo',sans-serif;font-weight:900;font-stretch:110%;
+  font-size:clamp(26px,4vw,38px);letter-spacing:-.02em;line-height:1}
+.brand .accent{color:var(--tulip)}
+.brand small{display:block;font-family:'Inter';font-weight:500;font-size:12px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--delft);margin-top:6px}
+.totals{text-align:right;font-family:'Archivo';font-weight:700}
+.totals .big{font-size:clamp(22px,3vw,30px);font-weight:900}
+.totals .big span{color:var(--green)}
+.totals .sub{font-size:12px;font-weight:500;color:var(--muted);font-family:'Inter'}
+
+/* ---------- mountain strip ---------- */
+.mountain{
+  display:flex;align-items:flex-end;gap:5px;
+  overflow-x:auto;padding:26px 2px 12px;
+  scrollbar-width:thin;
+  border-bottom:1px solid var(--line);
+}
+.peak{
+  flex:0 0 auto;width:52px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:none;border:none;font-family:inherit;color:inherit;padding:0;
+}
+.peak .bar{
+  width:100%;border:1.5px solid var(--ink);border-radius:3px 3px 0 0;
+  background:var(--card);position:relative;overflow:hidden;
+}
+.peak .fill{position:absolute;bottom:0;left:0;width:100%;background:var(--green);opacity:.85}
+.peak .fill.partial{background:var(--delft)}
+.peak.done .bar{border-color:var(--green)}
+.peak .lbl{font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.peak .cnt{font-size:9.5px;color:var(--muted)}
+.peak.active .lbl{color:var(--tulip);font-weight:700}
+.peak.active .bar{border-color:var(--tulip);border-width:2px;box-shadow:0 0 0 2px rgba(232,89,12,.18)}
+.peak:focus-visible{outline:2px solid var(--tulip);outline-offset:2px}
+
+/* ---------- day header ---------- */
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:20px 0 4px}
+.dayhead h2{font-family:'Archivo';font-weight:900;font-size:clamp(20px,3vw,28px);letter-spacing:-.01em}
+.dayhead h2 em{font-style:normal;color:var(--delft)}
+.routine{font-size:12.5px;color:var(--muted)}
+.routine b{color:var(--tulip)}
+.daymeta{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--muted)}
+.daymeta .g{color:var(--green);font-weight:600}
+.daymeta .r{color:var(--red);font-weight:600}
+.reset{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;
+  font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit}
+.reset:hover{border-color:var(--red);color:var(--red)}
+
+/* ---------- grid ---------- */
+.grid{
+  display:grid;gap:8px;padding:14px 0 8px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+}
+.card{
+  background:var(--card);
+  border:1.5px solid var(--line);
+  border-radius:8px;
+  padding:13px 10px 12px;
+  font-family:'Archivo';font-weight:700;font-size:16.5px;letter-spacing:-.01em;
+  text-align:center;cursor:pointer;user-select:none;
+  position:relative;line-height:1.2;
+  color:var(--ink);
+}
+.card .art{display:block;font-family:'Inter';font-weight:500;font-size:10.5px;color:var(--muted);letter-spacing:.02em;margin-bottom:2px}
+.card.g{background:var(--green-bg);border-color:var(--green)}
+.card.r{background:var(--red-bg);border-color:var(--red)}
+.card.cur{outline:2.5px solid var(--tulip);outline-offset:1.5px;border-color:var(--tulip)}
+.card .idx{position:absolute;top:4px;left:7px;font-family:'Inter';font-size:9px;font-weight:500;color:var(--muted);opacity:.7}
+.card.g .idx{color:var(--green)}
+.card.r .idx{color:var(--red)}
+
+/* ---------- popup / bottom sheet ---------- */
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--sheetbg);color:#F2F5FB;
+  transform:translateY(102%);
+  border-top:4px solid var(--tulip);
+  padding:18px 22px calc(16px + env(safe-area-inset-bottom));
+}
+.sheet.open{transform:translateY(0)}
+.sheet-inner{max-width:1180px;margin:0 auto;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.sheet .word{font-family:'Archivo';font-weight:900;font-size:clamp(24px,4vw,34px);letter-spacing:-.01em;min-width:200px}
+.sheet .pos{display:inline-block;font-family:'Inter';font-size:10.5px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--tulip);
+  border:1px solid rgba(232,89,12,.55);border-radius:4px;padding:2px 7px;margin-top:8px}
+.sheet .def{flex:1;min-width:220px}
+.sheet .en{font-size:19px;font-weight:600;color:#fff;margin-bottom:6px}
+.sheet .ex{font-size:14px;color:#B9C4DC;line-height:1.5}
+.sheet .ex b{color:#E6ECF7;font-weight:600}
+.sheet-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+.sbtn{font-family:'Archivo';font-weight:700;font-size:14px;border-radius:8px;
+  padding:10px 16px;cursor:pointer;border:1.5px solid transparent}
+.sbtn.g{background:var(--green);color:#fff}
+.sbtn.f{background:var(--red);color:#fff}
+.sbtn.x{background:transparent;color:#B9C4DC;border-color:#3A4E7E}
+.sheet .close{position:absolute;top:10px;right:14px;background:none;border:none;color:#8FA0C4;
+  font-size:20px;cursor:pointer;line-height:1;padding:4px}
+
+/* ---------- key legend ---------- */
+.legend{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--legbg);backdrop-filter:blur(6px);
+  border-top:1px solid var(--line);
+  padding:8px 20px calc(8px + env(safe-area-inset-bottom));
+  display:flex;gap:18px;justify-content:center;flex-wrap:wrap;
+  font-size:12px;color:var(--muted);
+}
+kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
+  border:1px solid var(--line);border-bottom-width:2.5px;border-radius:4px;padding:1px 6px;color:var(--ink)}
+.legend .kg kbd{border-color:var(--green);color:var(--green)}
+.legend .kf kbd{border-color:var(--red);color:var(--red)}
+.legend .kd kbd{border-color:var(--delft);color:var(--delft)}
+
+.storage-note{font-size:11.5px;color:var(--muted);padding:8px 0 0}
+.storage-note.err{color:var(--red)}
+
+
+/* ---------- modes & sections ---------- */
+.modes{display:flex;gap:6px;padding:12px 0 2px;flex-wrap:wrap}
+.fbtn{font-family:'Archivo';font-weight:700;font-size:12.5px;letter-spacing:.01em;
+  background:var(--card);color:var(--muted);border:1.5px dashed var(--line);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.fbtn:hover{border-color:var(--tulip);color:var(--tulip)}
+.fbtn.active{background:var(--tulip);border-color:var(--tulip);border-style:solid;color:#fff}
+.modesep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
+.empty{padding:48px 0;color:var(--muted);font-size:14.5px;text-align:center}
+.card .art.de{color:var(--delft);font-weight:700}
+.card .art.het{color:var(--tulip);font-weight:700}
+.sheet .ex{cursor:pointer}
+.mbtn{font-family:'Archivo';font-weight:700;font-size:12.5px;letter-spacing:.01em;
+  background:var(--card);color:var(--muted);border:1.5px solid var(--line);
+  border-radius:999px;padding:6px 14px;cursor:pointer}
+.mbtn:hover{border-color:var(--delft);color:var(--delft)}
+.mbtn.active{background:var(--activebg);border-color:var(--activebg);color:var(--activefg)}
+.sect{margin-top:8px}
+.secthead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:16px 0 2px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.sectt{font-family:'Archivo';font-weight:800;font-size:15px;letter-spacing:-.01em}
+.badge{font-family:'Inter';font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:4px;padding:2px 7px}
+.badge.new{background:var(--tulip);color:#fff}
+.badge.rev{background:#E4E9F4;color:var(--delft)}
+.badge.mix{background:var(--delft);color:#fff}
+.seccnt{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.peak.inrange .lbl{color:var(--ink)}
+.sheet .conj{margin-top:10px;font-size:13px;color:#9FB0D3;line-height:1.5;
+  border-top:1px solid #2A3D6B;padding-top:8px}
+.sheet .conj .conjlab{display:block;font-size:9.5px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--tulip);margin-bottom:2px}
+
+.ten{font-family:'Inter';font-weight:500;font-size:.68em;color:var(--muted);letter-spacing:0}
+.hright{display:flex;align-items:center;gap:12px}
+.theme{background:var(--card);border:1.5px solid var(--line);border-radius:8px;
+  font-size:15px;padding:5px 10px;cursor:pointer;line-height:1}
+.theme:hover{border-color:var(--delft)}
+
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:6px}
+  .card{font-size:14px;padding:11px 6px 10px}
+  .sheet-inner{gap:10px}
+  .sheet-actions{margin-left:0;width:100%}
+  .sbtn{flex:1;text-align:center}
+  .legend{display:none}
+}
+@media (prefers-reduced-motion:no-preference){
+  .sheet{transition:transform .12s ease-out}
+  .card{transition:background .08s,border-color .08s}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">DE VOCAB<span class="accent">BERG</span>
+      <small>1020 woorden &middot; A0 &rarr; A2 &middot; GregMat-stijl cumulatief</small>
+    </div>
+    <div class="hright">
+      <div class="totals">
+        <div class="big"><span id="totGreen">0</span> / 1020</div>
+        <div class="sub">woorden gekend &middot; <span id="totPct">0%</span> van de berg</div>
+      </div>
+      <button class="theme" id="themeBtn" title="Licht / donker">&#127769;</button>
+    </div>
+  </header>
+
+  <nav class="mountain" id="mountain" aria-label="Dagen"></nav>
+
+  <div class="dayhead">
+    <h2 id="dayTitle">Dag 1 — <em>…</em></h2>
+    <div class="daymeta">
+      <span class="g" id="dayG">0 gekend</span>
+      <span class="r" id="dayR">0 vergeten</span>
+      <button class="reset" id="resetBtn" title="Wis markeringen van deze dag">reset dag</button>
+      <button class="reset" id="expBtn" title="Kopieer je voortgang als code (voor ander apparaat of back-up)">export</button>
+      <button class="reset" id="impBtn" title="Plak een voortgang-code van een ander apparaat">import</button>
+    </div>
+  </div>
+  <div class="routine" id="routine"></div>
+  <div class="modes">
+    <button class="mbtn active" data-m="order">Op volgorde</button>
+    <button class="mbtn" data-m="sday">Schud per dag</button>
+    <button class="mbtn" data-m="sall">Alles gemengd</button>
+    <span class="modesep"></span>
+    <button class="fbtn active" data-f="all">Alles</button>
+    <button class="fbtn" data-f="forgot">Alleen vergeten</button>
+    <button class="fbtn" data-f="unmarked">Alleen ongemarkeerd</button>
+  </div>
+  <div class="storage-note" id="storageNote"></div>
+  <div class="storage-note" id="ttsNote"></div>
+
+  <main id="sections"></main>
+</div>
+
+<div class="legend">
+  <span class="kg"><kbd>G</kbd> gekend</span>
+  <span class="kf"><kbd>F</kbd> vergeten</span>
+  <span class="kd"><kbd>D</kbd> definitie</span>
+  <span><kbd>X</kbd> wissen</span>
+  <span><kbd>&larr;&rarr;&uarr;&darr;</kbd> navigeren</span>
+  <span><kbd>P</kbd> uitspraak</span>
+  <span><kbd>S</kbd> schudden</span>
+  <span><kbd>[</kbd><kbd>]</kbd> dag wisselen</span>
+  <span><kbd>Esc</kbd> sluiten</span>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-label="Definitie">
+  <button class="close" id="sheetClose" aria-label="Sluiten">&times;</button>
+  <div class="sheet-inner">
+    <div>
+      <div class="word" id="shWord"></div>
+      <span class="pos" id="shPos"></span>
+    </div>
+    <div class="def">
+      <div class="en" id="shEn"></div>
+      <div class="ex" id="shEx"></div>
+      <div class="conj" id="shConj"></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="sbtn x" id="btnSpeak" title="Uitspraak (P)">&#128266; P</button>
+      <button class="sbtn g" id="btnG">Gekend &middot; G</button>
+      <button class="sbtn f" id="btnF">Vergeten &middot; F</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const DATA = []; // populated by data chunks below
+
+/* ================= app ================= */
+let day = 0, cur = 0, mode = "order";   // order | sday | sall
+let filter = "all";                      // all | forgot | unmarked
+let marks = {};                          // "d-i" -> 1 green | 2 red
+let mem = false, saveTimer = null;
+let VIS = [], ELS = [], SECCOUNTS = [];
+let theme = null;
+
+const T_EN = [
+"survival: questions & greetings","pronouns & to be / to have","numbers 0-20 & quantity",
+"big numbers & time","days, months & seasons","family & people","house & living",
+"food 1: groceries","food 2: meals & restaurant","drinks & supermarket",
+"city & asking directions","transport & public transport","core verbs 1","core verbs 2",
+"core verbs 3","adjectives 1","adjectives 2","colors & materials","clothing",
+"body & health","the weather (essential in NL!)","study & university","work & office",
+"money & bureaucracy","household & personal care","hobbies, sports & free time",
+"nature & animals","feelings & personality","communication & tech","connector words",
+"adverbs & degree","prepositions","kitchen & household items","Dutch life & official matters"
+];
+function applyTheme(){
+  document.documentElement.dataset.theme = theme==="dark" ? "dark" : "";
+  const b = $("themeBtn");
+  if(b) b.innerHTML = theme==="dark" ? "&#9728;&#65039;" : "&#127769;";
+}
+
+const $ = id => document.getElementById(id);
+const KEY = "vocabberg_v1";
+const key = (d,i) => d + "-" + i;
+
+/* ---------- storage ---------- */
+function lsOK(){
+  try{ localStorage.setItem("__vb_t","1"); localStorage.removeItem("__vb_t"); return true; }
+  catch(e){ return false; }
+}
+const backend = window.storage ? "artifact" : (lsOK() ? "local" : "none");
+function applyState(s){
+  marks = s.marks || {};
+  day = Math.min(s.day || 0, DATA.length-1);
+  if(s.theme) theme = s.theme;
+}
+function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme}); }
+async function load(){
+  try{
+    if(backend==="artifact"){
+      const r = await window.storage.get(KEY);
+      if(r && r.value) applyState(JSON.parse(r.value));
+    } else if(backend==="local"){
+      const r = localStorage.getItem(KEY);
+      if(r) applyState(JSON.parse(r));
+    } else {
+      mem = true;
+    }
+  }catch(e){ /* key not found is fine */ }
+  if(!theme) theme = (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  applyTheme();
+  $("storageNote").textContent = mem
+    ? "Let op: opslag niet beschikbaar in deze browser - voortgang gaat verloren bij sluiten. Gebruik export/import."
+    : "";
+  if(mem) $("storageNote").classList.add("err");
+}
+function save(){
+  if(backend==="none") return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      if(backend==="artifact") await window.storage.set(KEY, snapshot());
+      else localStorage.setItem(KEY, snapshot());
+    }catch(e){ /* ignore transient */ }
+  }, 350);
+}
+
+/* ---------- conjugation (tegenwoordige tijd) ---------- */
+const isV = c => "aeiou".includes(c);
+const IRR = {
+  zijn:["ben","bent","is"], hebben:["heb","hebt","heeft"], kunnen:["kan","kunt","kan"],
+  willen:["wil","wilt","wil"], mogen:["mag","mag","mag"], moeten:["moet","moet","moet"],
+  zullen:["zal","zult","zal"], gaan:["ga","gaat","gaat"], staan:["sta","staat","staat"],
+  doen:["doe","doet","doet"], zien:["zie","ziet","ziet"], komen:["kom","komt","komt"]
+};
+const SEP = {
+  opstaan:["op","staan"], aankomen:["aan","komen"], inchecken:["in","checken"], uitchecken:["uit","checken"],
+  meenemen:["mee","nemen"], aantrekken:["aan","trekken"], uittrekken:["uit","trekken"], uitnodigen:["uit","nodigen"],
+  oversteken:["over","steken"], overstappen:["over","stappen"], invullen:["in","vullen"], weggooien:["weg","gooien"],
+  afwassen:["af","wassen"], opladen:["op","laden"], inschrijven:["in","schrijven"], aanvragen:["aan","vragen"],
+  uitleggen:["uit","leggen"], inloggen:["in","loggen"], uitloggen:["uit","loggen"], opnemen:["op","nemen"],
+  schoonmaken:["schoon","maken"], hardlopen:["hard","lopen"]
+};
+const STEMX = {
+  luisteren:"luister", veranderen:"verander", tekenen:"teken", ondertekenen:"onderteken",
+  openen:"open", oefenen:"oefen", winkelen:"winkel", wandelen:"wandel", schilderen:"schilder",
+  betekenen:"beteken", recyclen:"recycle", appen:"app", downloaden:"download", antwoorden:"antwoord"
+};
+const HET = { regenen:"regent", sneeuwen:"sneeuwt", vriezen:"vriest", waaien:"waait", gebeuren:"gebeurt" };
+
+function stem(inf){
+  if(STEMX[inf]) return STEMX[inf];
+  let s = inf.slice(0,-2);
+  const n = s.length;
+  if(n>=2 && s[n-1]===s[n-2] && !isV(s[n-1])){
+    s = s.slice(0,-1);                                   // zitten -> zit
+  } else if(n>=2 && !isV(s[n-1]) && s[n-1]!=="w" && isV(s[n-2]) && s[n-2]!=="i" && (n<3 || !isV(s[n-3]))){
+    s = s.slice(0,n-1) + s[n-2] + s[n-1];                // wonen -> woon
+  }
+  if(s.endsWith("v")) s = s.slice(0,-1)+"f";             // geven -> geef
+  if(s.endsWith("z")) s = s.slice(0,-1)+"s";             // lezen -> lees
+  return s;
+}
+function parts(inf){
+  if(IRR[inf]) return IRR[inf];
+  const s = stem(inf);
+  const t = s + (s.endsWith("t") ? "" : "t");
+  return [s,t,t];
+}
+function conjLine(nl,pos){
+  if(pos !== "werkwoord") return "";
+  if(nl === "houden van") return "ik hou van \u00b7 jij houdt van \u00b7 hij/zij houdt van \u00b7 wij houden van";
+  if(HET[nl]) return "het " + HET[nl] + " \u2014 onpersoonlijk werkwoord (impersonal: only with 'het')";
+  if(SEP[nl]){
+    const pre = SEP[nl][0], base = SEP[nl][1];
+    const p = parts(base);
+    return "ik "+p[0]+" "+pre+" \u00b7 jij "+p[1]+" "+pre+" \u00b7 hij/zij "+p[2]+" "+pre+" \u00b7 wij "+base+" "+pre+"  (scheidbaar werkwoord / separable)";
+  }
+  const p = parts(nl);
+  return "ik "+p[0]+" \u00b7 jij/u "+p[1]+" \u00b7 hij/zij "+p[2]+" \u00b7 wij/jullie/zij "+nl;
+}
+
+/* ---------- stats ---------- */
+function totalGreen(){
+  let t=0;
+  for(const k in marks) if(marks[k]===1) t++;
+  return t;
+}
+function dayGreen(d){
+  let g=0;
+  for(let i=0;i<DATA[d].w.length;i++) if(marks[key(d,i)]===1) g++;
+  return g;
+}
+
+/* ---------- mountain strip ---------- */
+function renderMountain(){
+  const n = DATA.length;
+  const el = $("mountain");
+  el.innerHTML = "";
+  for(let d=0; d<n; d++){
+    const g = dayGreen(d);
+    const h = 26 + Math.round((d/(n-1))*54);
+    const b = document.createElement("button");
+    b.className = "peak" + (d===day?" active":"") + (g===30?" done":"") + (d<=day?" inrange":"");
+    b.innerHTML =
+      '<div class="bar" style="height:'+h+'px">' +
+        '<div class="fill'+(g<30?" partial":"")+'" style="height:'+Math.round(g/30*100)+'%"></div>' +
+      '</div>' +
+      '<span class="lbl">Dag '+(d+1)+'</span>' +
+      '<span class="cnt">'+g+'/30</span>';
+    b.onclick = ()=>{ setDay(d); };
+    el.appendChild(b);
+  }
+  const act = el.querySelector(".peak.active");
+  if(act) act.scrollIntoView({inline:"center", block:"nearest"});
+}
+
+/* ---------- cumulative view ---------- */
+function shuffleArr(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function passFilter(it){
+  const m = marks[key(it.d,it.i)];
+  if(filter==="forgot") return m===2;
+  if(filter==="unmarked") return m===undefined;
+  return true;
+}
+function buildSections(){
+  if(mode==="sall"){
+    const all=[];
+    for(let d=0;d<=day;d++) DATA[d].w.forEach((w,i)=>all.push({d:d,i:i}));
+    const kept = all.filter(passFilter);
+    shuffleArr(kept);
+    return kept.length ? [{d:null, items:kept}] : [];
+  }
+  const secs=[];
+  for(let d=0;d<=day;d++){
+    let idx = DATA[d].w.map((w,i)=>i).filter(i=>passFilter({d:d,i:i}));
+    if(!idx.length) continue;
+    if(mode==="sday") shuffleArr(idx);
+    secs.push({d:d, items: idx.map(i=>({d:d,i:i}))});
+  }
+  return secs;
+}
+function splitArticle(nl){
+  if(nl.startsWith("de ")) return ["de", nl.slice(3)];
+  if(nl.startsWith("het ")) return ["het", nl.slice(4)];
+  return ["", nl];
+}
+function renderGrid(){
+  const root = $("sections");
+  root.innerHTML = ""; VIS=[]; ELS=[]; SECCOUNTS=[];
+  const secs = buildSections();
+  secs.forEach(sec=>{
+    const s = document.createElement("section");
+    s.className = "sect";
+    const h = document.createElement("div");
+    h.className = "secthead";
+    if(sec.d===null){
+      h.innerHTML = '<span class="sectt">Alle '+sec.items.length+' woorden \u2014 gemengd</span>' +
+        '<span class="badge mix">dag 1\u2013'+(day+1)+'</span><span class="seccnt"></span>';
+    } else {
+      const tag = sec.d===day
+        ? '<span class="badge new">nieuw</span>'
+        : '<span class="badge rev">herhaling</span>';
+      h.innerHTML = '<span class="sectt">Dag '+(sec.d+1)+' \u2014 '+DATA[sec.d].t+' <span class="ten">('+T_EN[sec.d]+')</span></span>'+tag+'<span class="seccnt"></span>';
+    }
+    s.appendChild(h);
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    sec.items.forEach(it=>{
+      const v = VIS.length;
+      VIS.push(it);
+      const w = DATA[it.d].w[it.i];
+      const p = splitArticle(w[0]);
+      const c = document.createElement("div");
+      c.className = "card";
+      const tagNo = (mode==="sall") ? (it.d+1)+"."+(it.i+1) : (it.i+1);
+      c.innerHTML = '<span class="idx">'+tagNo+'</span>' +
+        (p[0] ? '<span class="art '+p[0]+'">'+p[0]+'</span>' : '<span class="art">&nbsp;</span>') +
+        p[1];
+      c.onclick = ()=>{ cur = v; syncCursor(); openSheet(); };
+      ELS.push(c);
+      grid.appendChild(c);
+    });
+    s.appendChild(grid);
+    root.appendChild(s);
+    SECCOUNTS.push({el: h.querySelector(".seccnt"), items: sec.items});
+  });
+  if(!VIS.length){
+    root.innerHTML = '<div class="empty">'+(filter==="forgot"
+      ? "Geen vergeten woorden hier &mdash; mooi zo! Klim verder."
+      : "Geen woorden in deze weergave &mdash; pas het filter aan.")+'</div>';
+  }
+  if(cur >= VIS.length) cur = 0;
+  syncAllMarks();
+  syncCursor(false);
+}
+function syncAllMarks(){
+  VIS.forEach((it,v)=>{
+    const m = marks[key(it.d,it.i)];
+    ELS[v].classList.toggle("g", m===1);
+    ELS[v].classList.toggle("r", m===2);
+  });
+  SECCOUNTS.forEach(sc=>{
+    let g=0,r=0;
+    sc.items.forEach(it=>{
+      const m = marks[key(it.d,it.i)];
+      if(m===1) g++; else if(m===2) r++;
+    });
+    sc.el.textContent = g+" \u2713 \u00b7 "+r+" \u2717 \u00b7 "+sc.items.length+" woorden";
+  });
+  let g=0,r=0;
+  VIS.forEach(it=>{
+    const m = marks[key(it.d,it.i)];
+    if(m===1) g++; else if(m===2) r++;
+  });
+  $("dayG").textContent = g+" gekend";
+  $("dayR").textContent = r+" vergeten";
+  const tg = totalGreen();
+  $("totGreen").textContent = tg;
+  $("totPct").textContent = Math.round(tg/1020*100)+"%";
+}
+function syncCursor(scroll=true){
+  ELS.forEach((el,v)=> el.classList.toggle("cur", v===cur));
+  if(scroll && ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
+  if(sheetOpen) fillSheet();
+}
+
+function setDay(d){
+  day = Math.max(0, Math.min(DATA.length-1, d));
+  cur = 0;
+  closeSheet();
+  const tot = (day+1)*30;
+  $("dayTitle").innerHTML = "Dag " + (day+1) + " \u2014 <em>" + DATA[day].t + "</em> <span class=\"ten\">(" + T_EN[day] + ")</span>";
+  $("routine").innerHTML = day===0
+    ? "De berg tot hier: <b>30 woorden</b>. Morgen: dag 1 herhalen + dag 2 leren."
+    : "De berg tot hier: <b>"+tot+" woorden</b> (dag 1 t/m "+(day+1)+") \u2014 herhaling boven, <b>nieuwe woorden onderaan</b>.";
+  $("resetBtn").textContent = "reset dag "+(day+1);
+  renderGrid();
+  renderMountain();
+  save();
+}
+function setMode(m){
+  mode = m;
+  cur = 0;
+  closeSheet();
+  document.querySelectorAll(".mbtn").forEach(b=> b.classList.toggle("active", b.dataset.m===mode));
+  renderGrid();
+}
+function setFilter(f){
+  filter = f;
+  cur = 0;
+  closeSheet();
+  document.querySelectorAll(".fbtn").forEach(b=> b.classList.toggle("active", b.dataset.f===filter));
+  renderGrid();
+}
+
+/* ---------- pronunciation (Web Speech, nl-NL) ---------- */
+let NLVOICE = null, ttsWarned = false;
+function pickVoice(){
+  if(!window.speechSynthesis) return;
+  const vs = speechSynthesis.getVoices();
+  NLVOICE = vs.find(v=> /nl[-_]NL/i.test(v.lang))
+         || vs.find(v=> v.lang && v.lang.toLowerCase().startsWith("nl"))
+         || vs.find(v=> /nederlands|dutch/i.test(v.name))
+         || null;
+}
+if(window.speechSynthesis){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function cleanSpeech(t){
+  return t
+    .replace(/\(.*?\)/g, " ")        // drop "(mv.)" etc.
+    .replace(/\s*\/\s*/g, ", ")      // "jij / je" -> "jij, je"
+    .replace(/\s+/g, " ").trim();
+}
+function speak(txt, retried){
+  try{
+    if(!window.speechSynthesis || !txt) return;
+    if(speechSynthesis.getVoices().length===0 && !retried){
+      // voice list loads async on many browsers; wait once, then speak
+      setTimeout(()=>{ pickVoice(); speak(txt, true); }, 300);
+      return;
+    }
+    if(!NLVOICE) pickVoice();
+    const u = new SpeechSynthesisUtterance(cleanSpeech(txt));
+    u.lang = "nl-NL";
+    u.rate = 0.85;
+    if(NLVOICE){
+      u.voice = NLVOICE;
+      $("ttsNote").textContent = "";
+      $("ttsNote").classList.remove("err");
+    } else {
+      $("ttsNote").textContent = "Geen Nederlandse (nl-NL) stem op dit apparaat - een Engelse stem leest nu voor, daarom klinkt het als 'goodie morgan' zonder harde g. Installeer een Nederlandse stem: Windows: Instellingen > Tijd en taal > Spraak > Stemmen toevoegen > Nederlands. Android: Instellingen > Tekst-naar-spraak > Google Speech > Nederlands downloaden. iOS/Mac: Instellingen > Toegankelijkheid > Gesproken materiaal > Stemmen > Nederlands. Chrome desktop (online) heeft vaak al 'Google Nederlands'.";
+      $("ttsNote").classList.add("err");
+    }
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){ /* no voice available */ }
+}
+let lastExNL = "";
+
+/* ---------- sheet ---------- */
+let sheetOpen = false;
+function fillSheet(){
+  const it = VIS[cur];
+  if(!it) return;
+  const w = DATA[it.d].w[it.i];
+  $("shWord").textContent = w[0];
+  $("shPos").textContent = w[2] + " \u00b7 dag " + (it.d+1);
+  $("shEn").textContent = w[1];
+  const ex = w[3] || "";
+  const sp = ex.split(" = ");
+  lastExNL = sp.length===2 ? sp[0] : "";
+  $("shEx").innerHTML = sp.length===2 ? "<b>"+sp[0]+"</b><br>"+sp[1] : ex;
+  $("shEx").title = lastExNL ? "Klik om de zin te horen" : "";
+  const cl = conjLine(w[0], w[2]);
+  $("shConj").innerHTML = cl ? '<span class="conjlab">tegenwoordige tijd</span>'+cl : "";
+  $("shConj").style.display = cl ? "" : "none";
+}
+function openSheet(){ fillSheet(); $("sheet").classList.add("open"); sheetOpen = true; }
+function closeSheet(){ $("sheet").classList.remove("open"); sheetOpen = false; }
+function toggleSheet(){ sheetOpen ? closeSheet() : openSheet(); }
+
+/* ---------- actions ---------- */
+function mark(v){
+  const it = VIS[cur];
+  if(!it) return;
+  const k = key(it.d, it.i);
+  if(v===0) delete marks[k]; else marks[k] = v;
+  syncAllMarks();
+  renderMountain();
+  save();
+  if(v!==0){
+    closeSheet();
+    if(cur < VIS.length-1){ cur++; syncCursor(); }
+  }
+}
+function cols(){
+  const g = document.querySelector(".grid");
+  if(!g) return 1;
+  return getComputedStyle(g).gridTemplateColumns.split(" ").length;
+}
+
+document.addEventListener("keydown", e=>{
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = VIS.length;
+  if(!n) return;
+  switch(e.key.toLowerCase()){
+    case "g": mark(1); break;
+    case "f": mark(2); break;
+    case "x": mark(0); break;
+    case "d": toggleSheet(); break;
+    case "s": setMode(mode==="order" ? "sday" : mode); break;   // (re)shuffle
+    case "p": { const it=VIS[cur]; if(it) speak(DATA[it.d].w[it.i][0]); break; }
+    case "enter": toggleSheet(); e.preventDefault(); break;
+    case "escape": closeSheet(); break;
+    case "arrowright": case "l": cur=(cur+1)%n; syncCursor(); e.preventDefault(); break;
+    case "arrowleft": case "h": cur=(cur-1+n)%n; syncCursor(); e.preventDefault(); break;
+    case "arrowdown": case "j": cur=Math.min(n-1,cur+cols()); syncCursor(); e.preventDefault(); break;
+    case "arrowup": case "k": cur=Math.max(0,cur-cols()); syncCursor(); e.preventDefault(); break;
+    case "[": setDay(day-1); break;
+    case "]": setDay(day+1); break;
+  }
+});
+
+$("btnG").onclick = ()=>mark(1);
+$("btnF").onclick = ()=>mark(2);
+$("sheetClose").onclick = closeSheet;
+$("resetBtn").onclick = ()=>{
+  if(!confirm("Markeringen van dag "+(day+1)+" wissen?")) return;
+  DATA[day].w.forEach((w,i)=> delete marks[key(day,i)]);
+  syncAllMarks(); renderMountain(); save();
+};
+document.querySelectorAll(".mbtn").forEach(b=>{
+  b.onclick = ()=> setMode(b.dataset.m);
+});
+document.querySelectorAll(".fbtn").forEach(b=>{
+  b.onclick = ()=> setFilter(b.dataset.f);
+});
+$("btnSpeak").onclick = ()=>{ const it=VIS[cur]; if(it) speak(DATA[it.d].w[it.i][0]); };
+$("shEx").onclick = ()=>{ if(lastExNL) speak(lastExNL); };
+$("themeBtn").onclick = ()=>{ theme = theme==="dark" ? "light" : "dark"; applyTheme(); save(); };
+$("expBtn").onclick = async ()=>{
+  const code = snapshot();
+  try{
+    await navigator.clipboard.writeText(code);
+    alert("Voortgang gekopieerd naar het klembord! Plak de code via 'import' op je andere apparaat.");
+  }catch(e){
+    prompt("Kopieer deze code (Ctrl/Cmd+C):", code);
+  }
+};
+$("impBtn").onclick = ()=>{
+  const t = prompt("Plak hier je voortgang-code:");
+  if(!t) return;
+  try{
+    const s = JSON.parse(t);
+    if(!s || typeof s !== "object" || !s.marks) throw 0;
+    applyState(s);
+    applyTheme();
+    setDay(day);
+    save();
+    alert("Voortgang hersteld!");
+  }catch(e){ alert("Ongeldige code - plak de volledige export-code."); }
+};
+
+async function init(){
+  await load();
+  setDay(day);
+}
+</script>
+<script>
+DATA.push(
+{t:"Overleven: vragen & groeten",w:[
+["waar","where","vraagwoord","Waar woon je? = Where do you live?"],
+["wie","who","vraagwoord","Wie is dat? = Who is that?"],
+["wat","what","vraagwoord","Wat is dit? = What is this?"],
+["wanneer","when","vraagwoord","Wanneer kom je? = When are you coming?"],
+["waarom","why","vraagwoord","Waarom niet? = Why not?"],
+["hoe","how","vraagwoord","Hoe gaat het? = How is it going?"],
+["welke","which","vraagwoord","Welke bus? = Which bus?"],
+["ja","yes","tussenwerpsel","Ja, graag. = Yes, please."],
+["nee","no","tussenwerpsel","Nee, dank je. = No, thank you."],
+["misschien","maybe","bijwoord","Misschien morgen. = Maybe tomorrow."],
+["hallo","hello","groet","Hallo, ik ben Rahul. = Hello, I am Rahul."],
+["dag","hi / bye (also: day)","groet","Dag! Tot morgen. = Bye! See you tomorrow."],
+["goedemorgen","good morning","groet","Goedemorgen allemaal! = Good morning everyone!"],
+["goedemiddag","good afternoon","groet","Goedemiddag, meneer. = Good afternoon, sir."],
+["goedenavond","good evening","groet","Goedenavond samen. = Good evening all."],
+["doei","bye (informal)","groet","Doei, tot later! = Bye, see you later!"],
+["tot ziens","goodbye / see you","groet","Tot ziens en bedankt. = Goodbye and thanks."],
+["alstublieft","please / here you go (formal)","beleefdheid","Een koffie, alstublieft. = A coffee, please."],
+["dank je wel","thank you","beleefdheid","Dank je wel voor de hulp. = Thank you for the help."],
+["graag gedaan","you are welcome","beleefdheid","Graag gedaan, hoor! = You are welcome!"],
+["sorry","sorry","beleefdheid","Sorry, ik ben te laat. = Sorry, I am late."],
+["pardon","excuse me","beleefdheid","Pardon, mag ik erlangs? = Excuse me, may I pass?"],
+["ok\u00e9","okay","tussenwerpsel","Ok\u00e9, dat is goed. = Okay, that is fine."],
+["goed","good / fine","bijv. naamwoord","Het gaat goed. = It is going well."],
+["prima","fine / great","bijv. naamwoord","Prima, geen probleem. = Fine, no problem."],
+["natuurlijk","of course","bijwoord","Natuurlijk help ik je. = Of course I will help you."],
+["wonen","to live (reside)","werkwoord","Ik woon in Eindhoven. = I live in Eindhoven."],
+["heten","to be called","werkwoord","Ik heet Rahul. = My name is Rahul."],
+["spreken","to speak","werkwoord","Spreek je Engels? = Do you speak English?"],
+["begrijpen","to understand","werkwoord","Ik begrijp het niet. = I do not understand."]
+]},
+{t:"Voornaamwoorden & zijn/hebben",w:[
+["ik","I","voornaamwoord","Ik ben student. = I am a student."],
+["jij / je","you (informal)","voornaamwoord","Jij bent aardig. = You are kind."],
+["u","you (formal)","voornaamwoord","Hoe heet u? = What is your name? (formal)"],
+["hij","he","voornaamwoord","Hij werkt hier. = He works here."],
+["zij / ze","she","voornaamwoord","Zij is mijn zus. = She is my sister."],
+["het","it","voornaamwoord","Het regent. = It is raining."],
+["wij / we","we","voornaamwoord","Wij fietsen samen. = We cycle together."],
+["jullie","you (plural)","voornaamwoord","Jullie zijn welkom. = You (all) are welcome."],
+["zij (mv.)","they","voornaamwoord","Zij komen morgen. = They come tomorrow."],
+["men","one / people","voornaamwoord","Men zegt dat vaak. = People say that often."],
+["zijn","to be","werkwoord","Wij zijn thuis. = We are home."],
+["ben","am","werkwoordsvorm","Ik ben moe. = I am tired."],
+["bent","are (you)","werkwoordsvorm","Jij bent vroeg. = You are early."],
+["is","is","werkwoordsvorm","Dit is lekker. = This is tasty."],
+["hebben","to have","werkwoord","Wij hebben tijd. = We have time."],
+["heb","have (I)","werkwoordsvorm","Ik heb een fiets. = I have a bike."],
+["heeft","has","werkwoordsvorm","Hij heeft honger. = He is hungry."],
+["dit","this (het-words)","aanwijzend","Dit huis is groot. = This house is big."],
+["dat","that (het-words)","aanwijzend","Dat weet ik niet. = I do not know that."],
+["deze","this / these (de-words)","aanwijzend","Deze kamer is mooi. = This room is nice."],
+["die","that / those (de-words)","aanwijzend","Die man daar. = That man over there."],
+["hier","here","bijwoord","Kom hier, alsjeblieft. = Come here, please."],
+["daar","there","bijwoord","Daar is het station. = There is the station."],
+["er","there (unstressed)","bijwoord","Er is een probleem. = There is a problem."],
+["iets","something","voornaamwoord","Wil je iets drinken? = Do you want something to drink?"],
+["niets","nothing","voornaamwoord","Ik zie niets. = I see nothing."],
+["iemand","someone","voornaamwoord","Iemand belt aan. = Someone rings the doorbell."],
+["niemand","no one","voornaamwoord","Niemand is thuis. = No one is home."],
+["alles","everything","voornaamwoord","Alles is klaar. = Everything is ready."],
+["ook","also / too","bijwoord","Ik kom ook. = I am coming too."]
+]},
+{t:"Getallen 0\u201320 & hoeveelheid",w:[
+["nul","zero","telwoord","Het is nul graden. = It is zero degrees."],
+["een","one","telwoord","Een kaartje, alstublieft. = One ticket, please."],
+["twee","two","telwoord","Twee koffie, graag. = Two coffees, please."],
+["drie","three","telwoord","Drie euro vijftig. = Three euros fifty."],
+["vier","four","telwoord","Vier stoelen. = Four chairs."],
+["vijf","five","telwoord","Om vijf uur. = At five o'clock."],
+["zes","six","telwoord","Zes dagen per week. = Six days a week."],
+["zeven","seven","telwoord","Zeven studenten. = Seven students."],
+["acht","eight","telwoord","Acht uur 's ochtends. = Eight in the morning."],
+["negen","nine","telwoord","Negen maanden. = Nine months."],
+["tien","ten","telwoord","Tien minuten lopen. = Ten minutes' walk."],
+["elf","eleven","telwoord","Elf spelers. = Eleven players."],
+["twaalf","twelve","telwoord","Twaalf maanden. = Twelve months."],
+["dertien","thirteen","telwoord","Dertien euro. = Thirteen euros."],
+["veertien","fourteen","telwoord","Veertien dagen = fourteen days (two weeks)."],
+["vijftien","fifteen","telwoord","Vijftien minuten pauze. = Fifteen minutes' break."],
+["zestien","sixteen","telwoord","Zestien uur per week. = Sixteen hours per week."],
+["zeventien","seventeen","telwoord","Zeventien graden. = Seventeen degrees."],
+["achttien","eighteen","telwoord","Achttien jaar oud. = Eighteen years old."],
+["negentien","nineteen","telwoord","Negentien studenten. = Nineteen students."],
+["twintig","twenty","telwoord","Twintig euro korting. = Twenty euros discount."],
+["eerste","first","rangtelwoord","De eerste dag. = The first day."],
+["tweede","second","rangtelwoord","De tweede verdieping. = The second floor."],
+["derde","third","rangtelwoord","De derde keer. = The third time."],
+["de keer","time (occasion)","zelfst. naamwoord","Nog een keer. = One more time."],
+["het nummer","number","zelfst. naamwoord","Mijn nummer is... = My number is..."],
+["veel","much / many","bijwoord","Veel succes! = Good luck!"],
+["weinig","little / few","bijwoord","Weinig tijd. = Little time."],
+["meer","more","bijwoord","Meer water, graag. = More water, please."],
+["minder","less / fewer","bijwoord","Minder suiker. = Less sugar."]
+]},
+{t:"Grote getallen & tijd",w:[
+["dertig","thirty","telwoord","Dertig woorden per dag. = Thirty words per day."],
+["veertig","forty","telwoord","Veertig procent. = Forty percent."],
+["vijftig","fifty","telwoord","Vijftig euro. = Fifty euros."],
+["zestig","sixty","telwoord","Zestig seconden. = Sixty seconds."],
+["zeventig","seventy","telwoord","Zeventig kilometer. = Seventy kilometers."],
+["tachtig","eighty","telwoord","Tachtig jaar. = Eighty years."],
+["negentig","ninety","telwoord","Negentig graden. = Ninety degrees."],
+["honderd","hundred","telwoord","Honderd euro huur. = A hundred euros rent."],
+["duizend","thousand","telwoord","Duizend woorden. = A thousand words."],
+["miljoen","million","telwoord","Een miljoen mensen. = A million people."],
+["half","half","telwoord","Half zeven = 6:30 (half TO seven!)"],
+["kwart","quarter","telwoord","Kwart over drie. = Quarter past three."],
+["het uur","hour / o'clock","zelfst. naamwoord","Om drie uur. = At three o'clock."],
+["de minuut","minute","zelfst. naamwoord","Vijf minuten wachten. = Wait five minutes."],
+["de seconde","second","zelfst. naamwoord","Tien seconden. = Ten seconds."],
+["de tijd","time","zelfst. naamwoord","Heb je tijd? = Do you have time?"],
+["laat","late","bijv. naamwoord","Hoe laat is het? = What time is it?"],
+["vroeg","early","bijv. naamwoord","Ik sta vroeg op. = I get up early."],
+["nu","now","bijwoord","Nu of nooit. = Now or never."],
+["straks","later (soon)","bijwoord","Tot straks! = See you in a bit!"],
+["vandaag","today","bijwoord","Vandaag is het maandag. = Today is Monday."],
+["morgen","tomorrow / morning","bijwoord","Tot morgen! = See you tomorrow!"],
+["gisteren","yesterday","bijwoord","Gisteren regende het. = Yesterday it rained."],
+["vanavond","tonight","bijwoord","Vanavond eten we thuis. = Tonight we eat at home."],
+["vanmorgen","this morning","bijwoord","Vanmorgen was ik moe. = This morning I was tired."],
+["altijd","always","bijwoord","Ik fiets altijd. = I always cycle."],
+["nooit","never","bijwoord","Nooit te laat. = Never too late."],
+["soms","sometimes","bijwoord","Soms regent het. = Sometimes it rains."],
+["vaak","often","bijwoord","Ik kook vaak. = I cook often."],
+["al","already","bijwoord","Ben je al klaar? = Are you done already?"]
+]},
+{t:"Dagen, maanden & seizoenen",w:[
+["maandag","Monday","zelfst. naamwoord","Op maandag werk ik. = On Monday I work."],
+["dinsdag","Tuesday","zelfst. naamwoord","Dinsdag is markt. = Tuesday is market day."],
+["woensdag","Wednesday","zelfst. naamwoord","Woensdag heb ik college. = Wednesday I have a lecture."],
+["donderdag","Thursday","zelfst. naamwoord","Donderdagavond sport ik. = Thursday evening I exercise."],
+["vrijdag","Friday","zelfst. naamwoord","Vrijdag borrelen we. = Friday we have drinks."],
+["zaterdag","Saturday","zelfst. naamwoord","Zaterdag doe ik boodschappen. = Saturday I do groceries."],
+["zondag","Sunday","zelfst. naamwoord","Zondag is alles dicht. = Sunday everything is closed."],
+["de week","week","zelfst. naamwoord","Volgende week begin ik. = Next week I start."],
+["het weekend","weekend","zelfst. naamwoord","Fijn weekend! = Have a nice weekend!"],
+["de maand","month","zelfst. naamwoord","Elke maand huur betalen. = Pay rent every month."],
+["januari","January","zelfst. naamwoord","In januari is het koud. = In January it is cold."],
+["februari","February","zelfst. naamwoord","Februari is kort. = February is short."],
+["maart","March","zelfst. naamwoord","In maart komt de lente. = In March spring comes."],
+["april","April","zelfst. naamwoord","April doet wat hij wil. = April does what it wants (saying)."],
+["mei","May","zelfst. naamwoord","In mei bloeien de tulpen. = In May the tulips bloom."],
+["juni","June","zelfst. naamwoord","In juni zijn de tentamens. = In June are the exams."],
+["juli","July","zelfst. naamwoord","Juli is vakantiemaand. = July is holiday month."],
+["augustus","August","zelfst. naamwoord","In augustus verhuis ik. = In August I move."],
+["september","September","zelfst. naamwoord","In september begint de studie. = In September studies begin."],
+["oktober","October","zelfst. naamwoord","Oktober is herfstmaand. = October is an autumn month."],
+["november","November","zelfst. naamwoord","In november regent het veel. = In November it rains a lot."],
+["december","December","zelfst. naamwoord","December is feestmaand. = December is festive month."],
+["de lente","spring","zelfst. naamwoord","De lente is mooi hier. = Spring is beautiful here."],
+["de zomer","summer","zelfst. naamwoord","In de zomer is het licht lang. = In summer it stays light long."],
+["de herfst","autumn","zelfst. naamwoord","De herfst is nat. = Autumn is wet."],
+["de winter","winter","zelfst. naamwoord","In de winter schaatsen we. = In winter we skate."],
+["het jaar","year","zelfst. naamwoord","Volgend jaar studeer ik af. = Next year I graduate."],
+["de datum","date","zelfst. naamwoord","Wat is de datum vandaag? = What is the date today?"],
+["de verjaardag","birthday","zelfst. naamwoord","Gefeliciteerd met je verjaardag! = Happy birthday!"],
+["vrij","free / off (work)","bijv. naamwoord","Morgen ben ik vrij. = Tomorrow I am off."]
+]},
+{t:"Familie & mensen",w:[
+["de man","man / husband","zelfst. naamwoord","Die man is mijn buurman. = That man is my neighbor."],
+["de vrouw","woman / wife","zelfst. naamwoord","De vrouw werkt bij ASML. = The woman works at ASML."],
+["het kind","child","zelfst. naamwoord","Het kind speelt buiten. = The child plays outside."],
+["de jongen","boy","zelfst. naamwoord","De jongen fietst naar school. = The boy cycles to school."],
+["het meisje","girl","zelfst. naamwoord","Het meisje leest een boek. = The girl reads a book."],
+["de vader","father","zelfst. naamwoord","Mijn vader heeft een bedrijf. = My father has a company."],
+["de moeder","mother","zelfst. naamwoord","Mijn moeder kookt lekker. = My mother cooks well."],
+["de ouders","parents","zelfst. naamwoord","Mijn ouders wonen in India. = My parents live in India."],
+["de zoon","son","zelfst. naamwoord","Hun zoon studeert. = Their son studies."],
+["de dochter","daughter","zelfst. naamwoord","De dochter is arts. = The daughter is a doctor."],
+["de broer","brother","zelfst. naamwoord","Mijn broer heet Anurag. = My brother is called Anurag."],
+["de zus","sister","zelfst. naamwoord","Heb je een zus? = Do you have a sister?"],
+["de opa","grandpa","zelfst. naamwoord","Opa vertelt verhalen. = Grandpa tells stories."],
+["de oma","grandma","zelfst. naamwoord","Oma bakt pannenkoeken. = Grandma bakes pancakes."],
+["de familie","family","zelfst. naamwoord","Mijn familie is groot. = My family is big."],
+["de vriend","friend / boyfriend","zelfst. naamwoord","Hij is een goede vriend. = He is a good friend."],
+["de vriendin","friend / girlfriend (f)","zelfst. naamwoord","Mijn vriendin woont in Dubai. = My friend lives in Dubai."],
+["de buurman","neighbor (m)","zelfst. naamwoord","De buurman is aardig. = The neighbor is nice."],
+["de buurvrouw","neighbor (f)","zelfst. naamwoord","De buurvrouw heeft een kat. = The neighbor has a cat."],
+["de mensen","people","zelfst. naamwoord","Veel mensen fietsen hier. = Many people cycle here."],
+["de baby","baby","zelfst. naamwoord","De baby slaapt. = The baby sleeps."],
+["getrouwd","married","bijv. naamwoord","Ze zijn getrouwd. = They are married."],
+["de naam","name","zelfst. naamwoord","Wat is je naam? = What is your name?"],
+["oud","old","bijv. naamwoord","Hoe oud ben je? = How old are you?"],
+["jong","young","bijv. naamwoord","Zij is nog jong. = She is still young."],
+["de leeftijd","age","zelfst. naamwoord","Leeftijd maakt niet uit. = Age does not matter."],
+["samen","together","bijwoord","We koken samen. = We cook together."],
+["alleen","alone / only","bijwoord","Ik woon alleen. = I live alone."],
+["de groep","group","zelfst. naamwoord","Een groep studenten. = A group of students."],
+["de collega","colleague","zelfst. naamwoord","Mijn collega helpt me. = My colleague helps me."]
+]},
+{t:"Huis & wonen",w:[
+["het huis","house","zelfst. naamwoord","Het huis heeft een tuin. = The house has a garden."],
+["de kamer","room","zelfst. naamwoord","Ik zoek een kamer. = I am looking for a room."],
+["de woning","home / dwelling","zelfst. naamwoord","De woning is te huur. = The dwelling is for rent."],
+["de huur","rent","zelfst. naamwoord","De huur is 600 euro. = The rent is 600 euros."],
+["huren","to rent","werkwoord","Ik huur een studio. = I rent a studio."],
+["de huisgenoot","housemate","zelfst. naamwoord","Mijn huisgenoot is stil. = My housemate is quiet."],
+["de keuken","kitchen","zelfst. naamwoord","De keuken is gedeeld. = The kitchen is shared."],
+["de badkamer","bathroom","zelfst. naamwoord","De badkamer is boven. = The bathroom is upstairs."],
+["de slaapkamer","bedroom","zelfst. naamwoord","De slaapkamer is klein. = The bedroom is small."],
+["de woonkamer","living room","zelfst. naamwoord","We zitten in de woonkamer. = We sit in the living room."],
+["de wc","toilet","zelfst. naamwoord","Waar is de wc? = Where is the toilet?"],
+["de deur","door","zelfst. naamwoord","Doe de deur dicht. = Close the door."],
+["het raam","window","zelfst. naamwoord","Het raam staat open. = The window is open."],
+["de sleutel","key","zelfst. naamwoord","Ik ben mijn sleutel kwijt. = I lost my key."],
+["de trap","stairs","zelfst. naamwoord","De trap is steil. = The stairs are steep."],
+["de lift","elevator","zelfst. naamwoord","De lift is kapot. = The elevator is broken."],
+["de verdieping","floor / storey","zelfst. naamwoord","Op de derde verdieping. = On the third floor."],
+["het adres","address","zelfst. naamwoord","Wat is je adres? = What is your address?"],
+["de straat","street","zelfst. naamwoord","Ik woon in deze straat. = I live on this street."],
+["de buurt","neighborhood","zelfst. naamwoord","Een rustige buurt. = A quiet neighborhood."],
+["het gebouw","building","zelfst. naamwoord","Een hoog gebouw. = A tall building."],
+["het dak","roof","zelfst. naamwoord","Het dak lekt. = The roof leaks."],
+["de muur","wall","zelfst. naamwoord","Een witte muur. = A white wall."],
+["de vloer","floor (surface)","zelfst. naamwoord","De vloer is koud. = The floor is cold."],
+["het bed","bed","zelfst. naamwoord","Ik ga naar bed. = I am going to bed."],
+["de tafel","table","zelfst. naamwoord","Aan tafel! = Dinner is ready! (to the table)"],
+["de stoel","chair","zelfst. naamwoord","Pak een stoel. = Grab a chair."],
+["de kast","closet / cupboard","zelfst. naamwoord","De kast is vol. = The closet is full."],
+["de lamp","lamp","zelfst. naamwoord","Doe de lamp aan. = Turn on the lamp."],
+["verhuizen","to move (house)","werkwoord","Ik verhuis in augustus. = I move in August."]
+]},
+{t:"Eten 1: boodschappen",w:[
+["het eten","food","zelfst. naamwoord","Het eten is klaar. = The food is ready."],
+["het brood","bread","zelfst. naamwoord","Vers brood van de bakker. = Fresh bread from the baker."],
+["de kaas","cheese","zelfst. naamwoord","Nederlandse kaas is beroemd. = Dutch cheese is famous."],
+["de melk","milk","zelfst. naamwoord","Een liter melk. = A liter of milk."],
+["het ei","egg","zelfst. naamwoord","Een gekookt ei. = A boiled egg."],
+["de boter","butter","zelfst. naamwoord","Brood met boter. = Bread with butter."],
+["de rijst","rice","zelfst. naamwoord","Ik eet vaak rijst. = I often eat rice."],
+["de pasta","pasta","zelfst. naamwoord","Pasta met tomatensaus. = Pasta with tomato sauce."],
+["de aardappel","potato","zelfst. naamwoord","Aardappels zijn goedkoop. = Potatoes are cheap."],
+["de groente","vegetable(s)","zelfst. naamwoord","Verse groente van de markt. = Fresh vegetables from the market."],
+["het fruit","fruit","zelfst. naamwoord","Fruit is gezond. = Fruit is healthy."],
+["de appel","apple","zelfst. naamwoord","Een appel per dag. = An apple a day."],
+["de banaan","banana","zelfst. naamwoord","De banaan is rijp. = The banana is ripe."],
+["de sinaasappel","orange (fruit)","zelfst. naamwoord","Vers sinaasappelsap. = Fresh orange juice."],
+["de tomaat","tomato","zelfst. naamwoord","Een kilo tomaten. = A kilo of tomatoes."],
+["de ui","onion","zelfst. naamwoord","Snijd de ui fijn. = Chop the onion finely."],
+["de wortel","carrot","zelfst. naamwoord","Wortels voor de soep. = Carrots for the soup."],
+["het vlees","meat","zelfst. naamwoord","Ik eet geen vlees. = I do not eat meat."],
+["de kip","chicken","zelfst. naamwoord","Kip of vegetarisch? = Chicken or vegetarian?"],
+["de vis","fish","zelfst. naamwoord","Verse vis op de markt. = Fresh fish at the market."],
+["de soep","soup","zelfst. naamwoord","Tomatensoep, graag. = Tomato soup, please."],
+["de suiker","sugar","zelfst. naamwoord","Zonder suiker, graag. = Without sugar, please."],
+["het zout","salt","zelfst. naamwoord","Een snufje zout. = A pinch of salt."],
+["de peper","pepper","zelfst. naamwoord","Zout en peper. = Salt and pepper."],
+["de olie","oil","zelfst. naamwoord","Olijfolie in de pan. = Olive oil in the pan."],
+["het meel","flour","zelfst. naamwoord","Meel voor pannenkoeken. = Flour for pancakes."],
+["de yoghurt","yoghurt","zelfst. naamwoord","Yoghurt met fruit. = Yoghurt with fruit."],
+["vers","fresh","bijv. naamwoord","Alles is vers. = Everything is fresh."],
+["lekker","tasty / nice","bijv. naamwoord","Dit is echt lekker! = This is really tasty!"],
+["de honger","hunger","zelfst. naamwoord","Ik heb honger. = I am hungry."]
+]},
+{t:"Eten 2: maaltijden & restaurant",w:[
+["het ontbijt","breakfast","zelfst. naamwoord","Ontbijt met brood en kaas. = Breakfast with bread and cheese."],
+["de lunch","lunch","zelfst. naamwoord","Lunch om twaalf uur. = Lunch at twelve."],
+["het avondeten","dinner","zelfst. naamwoord","Het avondeten is om zes uur. = Dinner is at six."],
+["koken","to cook","werkwoord","Ik kook vanavond. = I am cooking tonight."],
+["eten","to eat","werkwoord","Wat eten we vandaag? = What are we eating today?"],
+["drinken","to drink","werkwoord","Wil je iets drinken? = Do you want something to drink?"],
+["proeven","to taste","werkwoord","Mag ik proeven? = May I taste?"],
+["bestellen","to order","werkwoord","Ik wil graag bestellen. = I would like to order."],
+["betalen","to pay","werkwoord","Kan ik pinnen? Ik wil betalen. = Can I pay by card?"],
+["de rekening","bill / account","zelfst. naamwoord","De rekening, alstublieft. = The bill, please."],
+["het menu","menu","zelfst. naamwoord","Mag ik het menu zien? = May I see the menu?"],
+["het restaurant","restaurant","zelfst. naamwoord","Een Indiaas restaurant. = An Indian restaurant."],
+["de ober","waiter","zelfst. naamwoord","De ober komt eraan. = The waiter is coming."],
+["reserveren","to reserve","werkwoord","Ik wil een tafel reserveren. = I want to reserve a table."],
+["het bord","plate","zelfst. naamwoord","Een leeg bord. = An empty plate."],
+["het glas","glass","zelfst. naamwoord","Een glas water. = A glass of water."],
+["de kop","cup","zelfst. naamwoord","Een kop koffie. = A cup of coffee."],
+["het mes","knife","zelfst. naamwoord","Het mes is scherp. = The knife is sharp."],
+["de vork","fork","zelfst. naamwoord","Mes en vork. = Knife and fork."],
+["de lepel","spoon","zelfst. naamwoord","Een lepel suiker. = A spoonful of sugar."],
+["de snack","snack","zelfst. naamwoord","Een snack voor onderweg. = A snack for the road."],
+["de friet","fries","zelfst. naamwoord","Friet met mayonaise. = Fries with mayonnaise."],
+["de pannenkoek","pancake","zelfst. naamwoord","Pannenkoeken met stroop. = Pancakes with syrup."],
+["het broodje","sandwich / roll","zelfst. naamwoord","Een broodje kaas. = A cheese sandwich."],
+["de hap","bite","zelfst. naamwoord","Neem een hap. = Take a bite."],
+["de dorst","thirst","zelfst. naamwoord","Ik heb dorst. = I am thirsty."],
+["vol","full","bijv. naamwoord","Ik zit vol. = I am full."],
+["heerlijk","delicious","bijv. naamwoord","Het was heerlijk! = It was delicious!"],
+["delen","to share","werkwoord","Zullen we delen? = Shall we share?"],
+["meenemen","to take away","werkwoord","Om mee te nemen, graag. = To take away, please."]
+]}
+);
+</script>
+<script>
+DATA.push(
+{t:"Drinken & supermarkt",w:[
+["het water","water","zelfst. naamwoord","Kraanwater is gratis. = Tap water is free."],
+["de koffie","coffee","zelfst. naamwoord","Koffie met melk. = Coffee with milk."],
+["de thee","tea","zelfst. naamwoord","Een kopje thee. = A cup of tea."],
+["het sap","juice","zelfst. naamwoord","Appelsap of sinaasappelsap? = Apple or orange juice?"],
+["het bier","beer","zelfst. naamwoord","Een biertje op het terras. = A beer on the terrace."],
+["de wijn","wine","zelfst. naamwoord","Rode of witte wijn? = Red or white wine?"],
+["de frisdrank","soft drink","zelfst. naamwoord","Frisdrank zonder suiker. = Sugar-free soft drink."],
+["de supermarkt","supermarket","zelfst. naamwoord","De supermarkt sluit om tien uur. = The supermarket closes at ten."],
+["de winkel","shop","zelfst. naamwoord","De winkel is open. = The shop is open."],
+["de markt","market","zelfst. naamwoord","Zaterdag is er markt. = On Saturday there is a market."],
+["kopen","to buy","werkwoord","Ik koop een fiets. = I am buying a bike."],
+["verkopen","to sell","werkwoord","Hij verkoopt zijn auto. = He is selling his car."],
+["de prijs","price","zelfst. naamwoord","Wat is de prijs? = What is the price?"],
+["duur","expensive","bijv. naamwoord","Dat is te duur. = That is too expensive."],
+["goedkoop","cheap","bijv. naamwoord","Goedkoop en goed. = Cheap and good."],
+["de korting","discount","zelfst. naamwoord","Tien procent korting. = Ten percent discount."],
+["de aanbieding","special offer","zelfst. naamwoord","Kaas in de aanbieding. = Cheese on offer."],
+["de kassa","checkout / till","zelfst. naamwoord","Betalen bij de kassa. = Pay at the checkout."],
+["de bon","receipt","zelfst. naamwoord","Wilt u de bon? = Do you want the receipt?"],
+["de tas","bag","zelfst. naamwoord","Eigen tas mee? = Brought your own bag?"],
+["het mandje","basket","zelfst. naamwoord","Pak een mandje. = Grab a basket."],
+["de fles","bottle","zelfst. naamwoord","Een fles water. = A bottle of water."],
+["het pak","carton / pack","zelfst. naamwoord","Een pak melk. = A carton of milk."],
+["het blik","can / tin","zelfst. naamwoord","Een blik tomaten. = A can of tomatoes."],
+["de kilo","kilo","zelfst. naamwoord","Een kilo appels. = A kilo of apples."],
+["de gram","gram","zelfst. naamwoord","Honderd gram kaas. = A hundred grams of cheese."],
+["de liter","liter","zelfst. naamwoord","Twee liter water. = Two liters of water."],
+["gratis","free (no cost)","bijv. naamwoord","De eerste maand is gratis. = The first month is free."],
+["open","open","bijv. naamwoord","De winkel is open. = The shop is open."],
+["dicht","closed","bijv. naamwoord","Op zondag dicht. = Closed on Sunday."]
+]},
+{t:"Stad & de weg vragen",w:[
+["de stad","city","zelfst. naamwoord","Eindhoven is een fijne stad. = Eindhoven is a nice city."],
+["het dorp","village","zelfst. naamwoord","Een klein dorp. = A small village."],
+["het centrum","center","zelfst. naamwoord","Ik fiets naar het centrum. = I cycle to the center."],
+["het plein","square","zelfst. naamwoord","Op het plein is een markt. = On the square there is a market."],
+["het park","park","zelfst. naamwoord","Wandelen in het park. = Walking in the park."],
+["de brug","bridge","zelfst. naamwoord","Over de brug fietsen. = Cycle over the bridge."],
+["de kerk","church","zelfst. naamwoord","Een oude kerk. = An old church."],
+["het museum","museum","zelfst. naamwoord","Het museum is gratis op maandag. = The museum is free on Monday."],
+["de bibliotheek","library","zelfst. naamwoord","Studeren in de bibliotheek. = Studying in the library."],
+["het station","station","zelfst. naamwoord","Het station is dichtbij. = The station is nearby."],
+["de halte","stop (bus/tram)","zelfst. naamwoord","De volgende halte. = The next stop."],
+["de weg","road / way","zelfst. naamwoord","Ik ben de weg kwijt. = I am lost."],
+["links","left","bijwoord","Ga hier links. = Turn left here."],
+["rechts","right","bijwoord","De winkel is rechts. = The shop is on the right."],
+["rechtdoor","straight ahead","bijwoord","Ga rechtdoor. = Go straight ahead."],
+["dichtbij","nearby","bijwoord","Het is dichtbij. = It is nearby."],
+["ver","far","bijv. naamwoord","Is het ver lopen? = Is it far to walk?"],
+["de kaart","map / card","zelfst. naamwoord","Kijk op de kaart. = Look at the map."],
+["de hoek","corner","zelfst. naamwoord","Om de hoek. = Around the corner."],
+["het stoplicht","traffic light","zelfst. naamwoord","Stop bij het stoplicht. = Stop at the traffic light."],
+["oversteken","to cross","werkwoord","Hier oversteken. = Cross here."],
+["lopen","to walk","werkwoord","Ik loop naar de winkel. = I walk to the shop."],
+["de kant","side","zelfst. naamwoord","Aan de andere kant. = On the other side."],
+["het noorden","north","zelfst. naamwoord","In het noorden van het land. = In the north of the country."],
+["het zuiden","south","zelfst. naamwoord","Eindhoven ligt in het zuiden. = Eindhoven is in the south."],
+["het oosten","east","zelfst. naamwoord","De zon komt op in het oosten. = The sun rises in the east."],
+["het westen","west","zelfst. naamwoord","Amsterdam ligt in het westen. = Amsterdam is in the west."],
+["de ingang","entrance","zelfst. naamwoord","De ingang is achter. = The entrance is at the back."],
+["de uitgang","exit","zelfst. naamwoord","Waar is de uitgang? = Where is the exit?"],
+["zoeken","to search / look for","werkwoord","Ik zoek het station. = I am looking for the station."]
+]},
+{t:"Vervoer & OV",w:[
+["de fiets","bicycle","zelfst. naamwoord","Iedereen heeft een fiets. = Everyone has a bike."],
+["fietsen","to cycle","werkwoord","Ik fiets naar de campus. = I cycle to campus."],
+["de trein","train","zelfst. naamwoord","De trein naar Amsterdam. = The train to Amsterdam."],
+["de bus","bus","zelfst. naamwoord","Bus 401 naar TU/e. = Bus 401 to TU/e."],
+["de tram","tram","zelfst. naamwoord","De tram rijdt niet vandaag. = The tram is not running today."],
+["de metro","metro","zelfst. naamwoord","Met de metro naar Zuid. = By metro to Zuid."],
+["de auto","car","zelfst. naamwoord","Ik heb geen auto nodig. = I do not need a car."],
+["rijden","to drive / ride","werkwoord","De trein rijdt om het uur. = The train runs every hour."],
+["de taxi","taxi","zelfst. naamwoord","Een taxi naar het vliegveld. = A taxi to the airport."],
+["het vliegtuig","airplane","zelfst. naamwoord","Het vliegtuig vertrekt om acht uur. = The plane departs at eight."],
+["vliegen","to fly","werkwoord","Ik vlieg naar Amsterdam. = I fly to Amsterdam."],
+["het vliegveld","airport","zelfst. naamwoord","Schiphol is het grootste vliegveld. = Schiphol is the biggest airport."],
+["het perron","platform","zelfst. naamwoord","De trein vertrekt van perron 3. = The train leaves from platform 3."],
+["het spoor","track","zelfst. naamwoord","Spoor 5, richting Utrecht. = Track 5, towards Utrecht."],
+["de ov-chipkaart","public transport card","zelfst. naamwoord","Check in met je ov-chipkaart. = Check in with your OV card."],
+["inchecken","to check in","werkwoord","Vergeet niet in te checken! = Do not forget to check in!"],
+["uitchecken","to check out","werkwoord","Uitchecken bij de poortjes. = Check out at the gates."],
+["het kaartje","ticket","zelfst. naamwoord","Een kaartje naar Tilburg. = A ticket to Tilburg."],
+["de vertraging","delay","zelfst. naamwoord","Tien minuten vertraging. = Ten minutes' delay."],
+["vertrekken","to depart","werkwoord","De bus vertrekt zo. = The bus departs soon."],
+["aankomen","to arrive","werkwoord","We komen om vijf uur aan. = We arrive at five."],
+["overstappen","to transfer","werkwoord","Overstappen in Utrecht. = Transfer in Utrecht."],
+["de reis","journey / trip","zelfst. naamwoord","Goede reis! = Have a good trip!"],
+["reizen","to travel","werkwoord","Ik reis graag. = I like to travel."],
+["de bagage","luggage","zelfst. naamwoord","Handbagage alleen. = Hand luggage only."],
+["de koffer","suitcase","zelfst. naamwoord","Twee koffers van 23 kilo. = Two suitcases of 23 kilos."],
+["het rijbewijs","driving licence","zelfst. naamwoord","Heb je een rijbewijs? = Do you have a driving licence?"],
+["parkeren","to park","werkwoord","Hier mag je niet parkeren. = You may not park here."],
+["de benzine","petrol","zelfst. naamwoord","Benzine is duur. = Petrol is expensive."],
+["de helm","helmet","zelfst. naamwoord","Een helm is slim. = A helmet is smart."]
+]},
+{t:"Kernwerkwoorden 1",w:[
+["gaan","to go","werkwoord","Ik ga naar huis. = I am going home."],
+["komen","to come","werkwoord","Kom je ook? = Are you coming too?"],
+["doen","to do","werkwoord","Wat doe je vanavond? = What are you doing tonight?"],
+["maken","to make","werkwoord","Ik maak het huiswerk. = I do (make) the homework."],
+["zien","to see","werkwoord","Ik zie je morgen. = I will see you tomorrow."],
+["kijken","to look / watch","werkwoord","Even kijken. = Let me have a look."],
+["horen","to hear","werkwoord","Ik hoor je niet goed. = I cannot hear you well."],
+["luisteren","to listen","werkwoord","Luister goed. = Listen carefully."],
+["zeggen","to say","werkwoord","Wat zeg je? = What are you saying?"],
+["praten","to talk","werkwoord","We praten later. = We will talk later."],
+["vragen","to ask","werkwoord","Mag ik iets vragen? = May I ask something?"],
+["antwoorden","to answer","werkwoord","Antwoord in het Nederlands. = Answer in Dutch."],
+["geven","to give","werkwoord","Geef mij de sleutel. = Give me the key."],
+["nemen","to take","werkwoord","Neem de bus. = Take the bus."],
+["krijgen","to get / receive","werkwoord","Ik krijg een cijfer. = I get a grade."],
+["willen","to want","werkwoord","Ik wil Nederlands leren. = I want to learn Dutch."],
+["kunnen","to be able to / can","werkwoord","Kun je me helpen? = Can you help me?"],
+["moeten","to have to / must","werkwoord","Ik moet studeren. = I have to study."],
+["mogen","to be allowed to / may","werkwoord","Mag ik hier zitten? = May I sit here?"],
+["zullen","shall / will","werkwoord","Zullen we gaan? = Shall we go?"],
+["weten","to know (fact)","werkwoord","Ik weet het niet. = I do not know."],
+["kennen","to know (person/place)","werkwoord","Ken je hem? = Do you know him?"],
+["denken","to think","werkwoord","Ik denk van wel. = I think so."],
+["vinden","to find / think of","werkwoord","Ik vind het leuk. = I like it (find it nice)."],
+["houden van","to love / like","werkwoord","Ik hou van reizen. = I love traveling."],
+["gebruiken","to use","werkwoord","Gebruik je woordenboek. = Use your dictionary."],
+["werken","to work","werkwoord","Ik werk zestien uur per week. = I work sixteen hours a week."],
+["leren","to learn / teach","werkwoord","Ik leer dertig woorden per dag. = I learn thirty words a day."],
+["lezen","to read","werkwoord","Ik lees een Nederlands boek. = I read a Dutch book."],
+["schrijven","to write","werkwoord","Schrijf je naam hier. = Write your name here."]
+]},
+{t:"Kernwerkwoorden 2",w:[
+["staan","to stand","werkwoord","De fiets staat buiten. = The bike is (standing) outside."],
+["zitten","to sit","werkwoord","Ik zit in de trein. = I am (sitting) on the train."],
+["liggen","to lie (down)","werkwoord","Het boek ligt op tafel. = The book is (lying) on the table."],
+["vallen","to fall","werkwoord","Pas op, niet vallen! = Careful, do not fall!"],
+["slapen","to sleep","werkwoord","Ik slaap acht uur. = I sleep eight hours."],
+["opstaan","to get up","werkwoord","Ik sta om zeven uur op. = I get up at seven."],
+["wachten","to wait","werkwoord","Wacht even. = Wait a moment."],
+["beginnen","to begin","werkwoord","De les begint om negen uur. = The class starts at nine."],
+["stoppen","to stop","werkwoord","De bus stopt hier. = The bus stops here."],
+["blijven","to stay","werkwoord","Ik blijf thuis. = I am staying home."],
+["worden","to become","werkwoord","Het wordt koud. = It is getting cold."],
+["brengen","to bring","werkwoord","Ik breng je naar het station. = I will bring you to the station."],
+["halen","to fetch / get","werkwoord","Ik haal koffie. = I will get coffee."],
+["sturen","to send","werkwoord","Stuur me een berichtje. = Send me a message."],
+["ontvangen","to receive","werkwoord","Ik heb je mail ontvangen. = I received your email."],
+["openen","to open","werkwoord","Open het raam. = Open the window."],
+["sluiten","to close","werkwoord","De winkel sluit om zes uur. = The shop closes at six."],
+["zetten","to put / set","werkwoord","Zet de tas op tafel. = Put the bag on the table."],
+["leggen","to lay / put","werkwoord","Leg het boek daar. = Put the book there."],
+["pakken","to grab / take","werkwoord","Pak je jas. = Grab your coat."],
+["dragen","to wear / carry","werkwoord","Hij draagt een jas. = He is wearing a coat."],
+["trekken","to pull","werkwoord","Trekken, niet duwen. = Pull, do not push."],
+["duwen","to push","werkwoord","Duw de deur open. = Push the door open."],
+["gooien","to throw","werkwoord","Gooi het in de prullenbak. = Throw it in the bin."],
+["vangen","to catch","werkwoord","Vang de bal! = Catch the ball!"],
+["breken","to break","werkwoord","Het glas is gebroken. = The glass is broken."],
+["repareren","to repair","werkwoord","Mijn fiets moet gerepareerd worden. = My bike needs repairing."],
+["vergeten","to forget","werkwoord","Vergeet je sleutel niet. = Do not forget your key."],
+["onthouden","to remember (memorize)","werkwoord","Onthoud dit woord. = Remember this word."],
+["herhalen","to repeat","werkwoord","Kunt u dat herhalen? = Can you repeat that?"]
+]},
+{t:"Kernwerkwoorden 3",w:[
+["helpen","to help","werkwoord","Kan ik je helpen? = Can I help you?"],
+["proberen","to try","werkwoord","Probeer het nog eens. = Try again."],
+["kiezen","to choose","werkwoord","Kies een vak. = Choose a course."],
+["veranderen","to change","werkwoord","Het weer verandert snel. = The weather changes fast."],
+["betekenen","to mean","werkwoord","Wat betekent dit woord? = What does this word mean?"],
+["gebeuren","to happen","werkwoord","Wat is er gebeurd? = What happened?"],
+["lijken","to seem / look like","werkwoord","Dat lijkt me leuk. = That seems nice to me."],
+["voelen","to feel","werkwoord","Ik voel me goed. = I feel good."],
+["ruiken","to smell","werkwoord","Het eten ruikt lekker. = The food smells good."],
+["raken","to touch / hit","werkwoord","Niet aanraken! = Do not touch!"],
+["spelen","to play","werkwoord","Ik speel gitaar en fluit. = I play guitar and flute."],
+["winnen","to win","werkwoord","Wie heeft gewonnen? = Who won?"],
+["verliezen","to lose","werkwoord","We hebben verloren. = We lost."],
+["verdienen","to earn","werkwoord","Ik verdien vijftien euro per uur. = I earn fifteen euros an hour."],
+["sparen","to save (money)","werkwoord","Ik spaar voor een laptop. = I am saving for a laptop."],
+["lenen","to borrow / lend","werkwoord","Mag ik je pen lenen? = May I borrow your pen?"],
+["tellen","to count","werkwoord","Tel tot tien. = Count to ten."],
+["meten","to measure","werkwoord","De kamer meten. = Measure the room."],
+["wegen","to weigh","werkwoord","De koffer weegt 23 kilo. = The suitcase weighs 23 kilos."],
+["passen","to fit / try on","werkwoord","Past deze maat? = Does this size fit?"],
+["bellen","to call (phone)","werkwoord","Ik bel je morgen. = I will call you tomorrow."],
+["ontmoeten","to meet","werkwoord","Leuk je te ontmoeten! = Nice to meet you!"],
+["bezoeken","to visit","werkwoord","Ik bezoek mijn neef in Zwitserland. = I visit my cousin in Switzerland."],
+["uitnodigen","to invite","werkwoord","Ik nodig je uit voor het feest. = I invite you to the party."],
+["feliciteren","to congratulate","werkwoord","Gefeliciteerd! = Congratulations!"],
+["bedanken","to thank","werkwoord","Ik wil je bedanken. = I want to thank you."],
+["glimlachen","to smile","werkwoord","Zij glimlacht altijd. = She always smiles."],
+["lachen","to laugh","werkwoord","We lachen veel samen. = We laugh a lot together."],
+["huilen","to cry","werkwoord","De baby huilt. = The baby is crying."],
+["hopen","to hope","werkwoord","Ik hoop op mooi weer. = I hope for nice weather."]
+]},
+{t:"Bijvoeglijke naamwoorden 1",w:[
+["groot","big / tall","bijv. naamwoord","Een groot huis. = A big house."],
+["klein","small","bijv. naamwoord","Een kleine kamer. = A small room."],
+["lang","long / tall","bijv. naamwoord","Een lange dag. = A long day."],
+["kort","short","bijv. naamwoord","Een korte pauze. = A short break."],
+["hoog","high","bijv. naamwoord","De huur is hoog. = The rent is high."],
+["laag","low","bijv. naamwoord","Een lage prijs. = A low price."],
+["breed","wide","bijv. naamwoord","Een brede straat. = A wide street."],
+["smal","narrow","bijv. naamwoord","Een smal fietspad. = A narrow bike path."],
+["dik","thick / fat","bijv. naamwoord","Een dik boek. = A thick book."],
+["dun","thin","bijv. naamwoord","Dun ijs, pas op. = Thin ice, be careful."],
+["zwaar","heavy / hard","bijv. naamwoord","Een zware koffer. = A heavy suitcase."],
+["licht","light (weight/color)","bijv. naamwoord","Een lichte tas. = A light bag."],
+["snel","fast","bijv. naamwoord","Een snelle trein. = A fast train."],
+["langzaam","slow","bijv. naamwoord","Spreek langzaam, alstublieft. = Speak slowly, please."],
+["nieuw","new","bijv. naamwoord","Mijn nieuwe fiets. = My new bike."],
+["modern","modern","bijv. naamwoord","Een modern gebouw. = A modern building."],
+["schoon","clean","bijv. naamwoord","De keuken is schoon. = The kitchen is clean."],
+["vies","dirty","bijv. naamwoord","Vieze afwas. = Dirty dishes."],
+["mooi","beautiful / nice","bijv. naamwoord","Wat een mooi uitzicht! = What a beautiful view!"],
+["lelijk","ugly","bijv. naamwoord","Een lelijk gebouw. = An ugly building."],
+["warm","warm","bijv. naamwoord","Een warme jas. = A warm coat."],
+["koud","cold","bijv. naamwoord","Het is koud buiten. = It is cold outside."],
+["heet","hot","bijv. naamwoord","Pas op, heet! = Careful, hot!"],
+["koel","cool","bijv. naamwoord","Een koele avond. = A cool evening."],
+["nat","wet","bijv. naamwoord","Nat van de regen. = Wet from the rain."],
+["droog","dry","bijv. naamwoord","Eindelijk droog weer. = Finally dry weather."],
+["hard","hard / loud","bijv. naamwoord","De muziek staat hard. = The music is loud."],
+["zacht","soft / quiet","bijv. naamwoord","Een zacht kussen. = A soft pillow."],
+["sterk","strong","bijv. naamwoord","Sterke koffie. = Strong coffee."],
+["zwak","weak","bijv. naamwoord","Een zwak wachtwoord. = A weak password."]
+]},
+{t:"Bijvoeglijke naamwoorden 2",w:[
+["slecht","bad","bijv. naamwoord","Slecht weer vandaag. = Bad weather today."],
+["beter","better","bijv. naamwoord","Morgen wordt het beter. = Tomorrow it gets better."],
+["best","best","bijv. naamwoord","De beste keuze. = The best choice."],
+["leuk","nice / fun","bijv. naamwoord","Een leuk feest. = A fun party."],
+["fijn","pleasant / nice","bijv. naamwoord","Fijne avond! = Have a nice evening!"],
+["moeilijk","difficult","bijv. naamwoord","Nederlands is niet zo moeilijk. = Dutch is not that difficult."],
+["makkelijk","easy","bijv. naamwoord","Dat is makkelijk. = That is easy."],
+["belangrijk","important","bijv. naamwoord","Een belangrijke afspraak. = An important appointment."],
+["interessant","interesting","bijv. naamwoord","Een interessant college. = An interesting lecture."],
+["saai","boring","bijv. naamwoord","Een saaie film. = A boring movie."],
+["druk","busy / crowded","bijv. naamwoord","Het is druk in de stad. = It is busy in the city."],
+["rustig","quiet / calm","bijv. naamwoord","Een rustige buurt. = A quiet neighborhood."],
+["moe","tired","bijv. naamwoord","Ik ben moe. = I am tired."],
+["ziek","sick","bijv. naamwoord","Ik ben ziek vandaag. = I am sick today."],
+["gezond","healthy","bijv. naamwoord","Gezond eten. = Healthy food."],
+["blij","happy / glad","bijv. naamwoord","Ik ben blij met mijn kamer. = I am happy with my room."],
+["verdrietig","sad","bijv. naamwoord","Ze is verdrietig. = She is sad."],
+["boos","angry","bijv. naamwoord","Word niet boos. = Do not get angry."],
+["bang","afraid","bijv. naamwoord","Ik ben bang voor spinnen. = I am afraid of spiders."],
+["verbaasd","surprised","bijv. naamwoord","Ik was verbaasd. = I was surprised."],
+["trots","proud","bijv. naamwoord","Trots op jezelf zijn. = Be proud of yourself."],
+["zeker","sure / certain","bijv. naamwoord","Weet je het zeker? = Are you sure?"],
+["klaar","ready / done","bijv. naamwoord","Ben je klaar? = Are you ready/done?"],
+["leeg","empty","bijv. naamwoord","De koelkast is leeg. = The fridge is empty."],
+["echt","real / really","bijv. naamwoord","Is dat echt waar? = Is that really true?"],
+["vreemd","strange","bijv. naamwoord","Een vreemd geluid. = A strange sound."],
+["gewoon","normal / just","bijv. naamwoord","Doe maar gewoon. = Just act normal (Dutch motto!)."],
+["bijzonder","special","bijv. naamwoord","Een bijzondere dag. = A special day."],
+["hetzelfde","the same","voornaamwoord","Voor mij hetzelfde. = The same for me."],
+["anders","different / otherwise","bijv. naamwoord","Dat is heel anders. = That is very different."]
+]},
+{t:"Kleuren & materialen",w:[
+["de kleur","color","zelfst. naamwoord","Welke kleur vind je mooi? = Which color do you like?"],
+["rood","red","bijv. naamwoord","Een rode fiets. = A red bike."],
+["oranje","orange","bijv. naamwoord","Oranje op Koningsdag! = Orange on King's Day!"],
+["geel","yellow","bijv. naamwoord","Gele tulpen. = Yellow tulips."],
+["groen","green","bijv. naamwoord","Het licht is groen. = The light is green."],
+["blauw","blue","bijv. naamwoord","Een blauwe lucht. = A blue sky."],
+["paars","purple","bijv. naamwoord","Een paarse trui. = A purple sweater."],
+["roze","pink","bijv. naamwoord","Roze bloemen. = Pink flowers."],
+["bruin","brown","bijv. naamwoord","Bruin brood. = Brown bread."],
+["grijs","gray","bijv. naamwoord","Een grijze lucht. = A gray sky."],
+["zwart","black","bijv. naamwoord","Zwarte koffie. = Black coffee."],
+["wit","white","bijv. naamwoord","Witte muren. = White walls."],
+["donker","dark","bijv. naamwoord","Het wordt vroeg donker. = It gets dark early."],
+["helder","bright / clear","bijv. naamwoord","Een heldere dag. = A clear day."],
+["het goud","gold","zelfst. naamwoord","Een medaille van goud. = A gold medal."],
+["het zilver","silver","zelfst. naamwoord","Zilver is goedkoper dan goud. = Silver is cheaper than gold."],
+["het hout","wood","zelfst. naamwoord","Een tafel van hout. = A wooden table."],
+["het metaal","metal","zelfst. naamwoord","Koud metaal. = Cold metal."],
+["het plastic","plastic","zelfst. naamwoord","Minder plastic gebruiken. = Use less plastic."],
+["het papier","paper","zelfst. naamwoord","Een vel papier. = A sheet of paper."],
+["de steen","stone / brick","zelfst. naamwoord","Een huis van steen. = A house of brick."],
+["het ijzer","iron","zelfst. naamwoord","Zo sterk als ijzer. = As strong as iron."],
+["de wol","wool","zelfst. naamwoord","Een trui van wol. = A wool sweater."],
+["het katoen","cotton","zelfst. naamwoord","Honderd procent katoen. = A hundred percent cotton."],
+["het leer","leather","zelfst. naamwoord","Schoenen van leer. = Leather shoes."],
+["rond","round","bijv. naamwoord","Een ronde tafel. = A round table."],
+["vierkant","square (shape)","bijv. naamwoord","Een vierkante doos. = A square box."],
+["de vorm","shape / form","zelfst. naamwoord","Een rare vorm. = A weird shape."],
+["het patroon","pattern","zelfst. naamwoord","Een mooi patroon. = A nice pattern."],
+["gestreept","striped","bijv. naamwoord","Een gestreept shirt. = A striped shirt."]
+]}
+);
+</script>
+<script>
+DATA.push(
+{t:"Kleding",w:[
+["de kleding","clothing","zelfst. naamwoord","Warme kleding voor de winter. = Warm clothes for winter."],
+["het t-shirt","t-shirt","zelfst. naamwoord","Een schoon t-shirt. = A clean t-shirt."],
+["de broek","trousers / pants","zelfst. naamwoord","Een nieuwe broek. = New trousers."],
+["de spijkerbroek","jeans","zelfst. naamwoord","Een blauwe spijkerbroek. = Blue jeans."],
+["de trui","sweater","zelfst. naamwoord","Een warme trui. = A warm sweater."],
+["het overhemd","(dress) shirt","zelfst. naamwoord","Een overhemd voor het gesprek. = A shirt for the interview."],
+["de jas","coat / jacket","zelfst. naamwoord","Neem je jas mee. = Take your coat."],
+["de regenjas","raincoat","zelfst. naamwoord","Een regenjas is essentieel hier. = A raincoat is essential here."],
+["de jurk","dress","zelfst. naamwoord","Een zomerjurk. = A summer dress."],
+["de rok","skirt","zelfst. naamwoord","Een lange rok. = A long skirt."],
+["de sok","sock","zelfst. naamwoord","Droge sokken. = Dry socks."],
+["de schoen","shoe","zelfst. naamwoord","Nieuwe schoenen kopen. = Buy new shoes."],
+["de laars","boot","zelfst. naamwoord","Laarzen voor de regen. = Boots for the rain."],
+["de slipper","flip-flop / slipper","zelfst. naamwoord","Slippers op het strand. = Flip-flops on the beach."],
+["de muts","beanie / hat","zelfst. naamwoord","Een muts tegen de kou. = A beanie against the cold."],
+["de sjaal","scarf","zelfst. naamwoord","Een dikke sjaal. = A thick scarf."],
+["de handschoen","glove","zelfst. naamwoord","Handschoenen op de fiets. = Gloves on the bike."],
+["de riem","belt","zelfst. naamwoord","Een leren riem. = A leather belt."],
+["de pet","cap","zelfst. naamwoord","Een pet tegen de zon. = A cap against the sun."],
+["het ondergoed","underwear","zelfst. naamwoord","Schoon ondergoed. = Clean underwear."],
+["de pyjama","pajamas","zelfst. naamwoord","In pyjama op zondag. = In pajamas on Sunday."],
+["de bril","glasses","zelfst. naamwoord","Ik draag een bril. = I wear glasses."],
+["het horloge","watch","zelfst. naamwoord","Een mooi horloge. = A nice watch."],
+["de ketting","necklace / chain","zelfst. naamwoord","De ketting van mijn fiets. = My bike chain."],
+["de ring","ring","zelfst. naamwoord","Een gouden ring. = A gold ring."],
+["de maat","size","zelfst. naamwoord","Welke maat heb je? = What size are you?"],
+["aantrekken","to put on","werkwoord","Trek je jas aan. = Put on your coat."],
+["uittrekken","to take off","werkwoord","Schoenen uittrekken, graag. = Take off your shoes, please."],
+["de zak","pocket / bag","zelfst. naamwoord","In mijn jaszak. = In my coat pocket."],
+["de knoop","button / knot","zelfst. naamwoord","Een knoop is los. = A button is loose."]
+]},
+{t:"Lichaam & gezondheid",w:[
+["het lichaam","body","zelfst. naamwoord","Een gezond lichaam. = A healthy body."],
+["het hoofd","head","zelfst. naamwoord","Mijn hoofd doet pijn. = My head hurts."],
+["het haar","hair","zelfst. naamwoord","Kort haar. = Short hair."],
+["het gezicht","face","zelfst. naamwoord","Een vriendelijk gezicht. = A friendly face."],
+["het oog","eye","zelfst. naamwoord","Bruine ogen. = Brown eyes."],
+["het oor","ear","zelfst. naamwoord","Mijn oren doen pijn van de kou. = My ears hurt from the cold."],
+["de neus","nose","zelfst. naamwoord","Een verstopte neus. = A blocked nose."],
+["de mond","mouth","zelfst. naamwoord","Mond open, zegt de tandarts. = Mouth open, says the dentist."],
+["de tand","tooth","zelfst. naamwoord","Tanden poetsen. = Brush teeth."],
+["de keel","throat","zelfst. naamwoord","Ik heb keelpijn. = I have a sore throat."],
+["de nek","neck","zelfst. naamwoord","Een stijve nek. = A stiff neck."],
+["de schouder","shoulder","zelfst. naamwoord","Pijn in mijn schouder. = Pain in my shoulder."],
+["de arm","arm","zelfst. naamwoord","Zijn arm is gebroken. = His arm is broken."],
+["de hand","hand","zelfst. naamwoord","Handen wassen. = Wash hands."],
+["de vinger","finger","zelfst. naamwoord","Tien vingers. = Ten fingers."],
+["de rug","back","zelfst. naamwoord","Rugpijn van het studeren. = Back pain from studying."],
+["de buik","belly / stomach","zelfst. naamwoord","Buikpijn na het eten. = Stomach ache after eating."],
+["het been","leg","zelfst. naamwoord","Sterke benen van het fietsen. = Strong legs from cycling."],
+["de knie","knee","zelfst. naamwoord","Mijn knie doet pijn. = My knee hurts."],
+["de voet","foot","zelfst. naamwoord","Te voet of met de fiets? = On foot or by bike?"],
+["het hart","heart","zelfst. naamwoord","Een gezond hart. = A healthy heart."],
+["het bloed","blood","zelfst. naamwoord","Bloed prikken bij de huisarts. = Blood test at the GP."],
+["de pijn","pain","zelfst. naamwoord","Waar doet het pijn? = Where does it hurt?"],
+["de koorts","fever","zelfst. naamwoord","Ik heb koorts. = I have a fever."],
+["de verkoudheid","(common) cold","zelfst. naamwoord","Een flinke verkoudheid. = A bad cold."],
+["hoesten","to cough","werkwoord","Hij hoest de hele nacht. = He coughs all night."],
+["de dokter","doctor","zelfst. naamwoord","Naar de dokter gaan. = Go to the doctor."],
+["de huisarts","GP / family doctor","zelfst. naamwoord","Schrijf je in bij een huisarts. = Register with a GP."],
+["de apotheek","pharmacy","zelfst. naamwoord","De apotheek is naast de huisarts. = The pharmacy is next to the GP."],
+["het medicijn","medicine","zelfst. naamwoord","Medicijnen ophalen. = Pick up medicine."]
+]},
+{t:"Het weer (essentieel in NL!)",w:[
+["het weer","weather","zelfst. naamwoord","Wat een weer! = What weather!"],
+["de zon","sun","zelfst. naamwoord","De zon schijnt eindelijk. = The sun is finally shining."],
+["de regen","rain","zelfst. naamwoord","Regen, regen, regen. = Rain, rain, rain."],
+["regenen","to rain","werkwoord","Het regent alweer. = It is raining again."],
+["de wolk","cloud","zelfst. naamwoord","Grijze wolken. = Gray clouds."],
+["bewolkt","cloudy","bijv. naamwoord","Vandaag is het bewolkt. = Today it is cloudy."],
+["de wind","wind","zelfst. naamwoord","Tegenwind op de fiets. = Headwind on the bike."],
+["waaien","to blow (wind)","werkwoord","Het waait hard. = It is very windy."],
+["de storm","storm","zelfst. naamwoord","Code oranje: storm! = Code orange: storm!"],
+["de sneeuw","snow","zelfst. naamwoord","Sneeuw in december. = Snow in December."],
+["sneeuwen","to snow","werkwoord","Het sneeuwt zelden hier. = It rarely snows here."],
+["het ijs","ice / ice cream","zelfst. naamwoord","IJs op de gracht. = Ice on the canal."],
+["de hagel","hail","zelfst. naamwoord","Hagel in april. = Hail in April."],
+["de mist","fog","zelfst. naamwoord","Dichte mist vanmorgen. = Dense fog this morning."],
+["het onweer","thunderstorm","zelfst. naamwoord","Onweer in de avond. = Thunderstorm in the evening."],
+["de bliksem","lightning","zelfst. naamwoord","Bliksem in de verte. = Lightning in the distance."],
+["de donder","thunder","zelfst. naamwoord","Eerst bliksem, dan donder. = First lightning, then thunder."],
+["de temperatuur","temperature","zelfst. naamwoord","De temperatuur daalt. = The temperature is dropping."],
+["de graad","degree","zelfst. naamwoord","Twintig graden vandaag. = Twenty degrees today."],
+["vriezen","to freeze","werkwoord","Vannacht gaat het vriezen. = Tonight it will freeze."],
+["de paraplu","umbrella","zelfst. naamwoord","Paraplu mee, altijd. = Umbrella along, always."],
+["schijnen","to shine / seem","werkwoord","De zon schijnt. = The sun is shining."],
+["de lucht","sky / air","zelfst. naamwoord","Een blauwe lucht. = A blue sky."],
+["de regenboog","rainbow","zelfst. naamwoord","Een regenboog na de bui. = A rainbow after the shower."],
+["buiten","outside","bijwoord","Buiten is het koud. = Outside it is cold."],
+["binnen","inside","bijwoord","Kom binnen! = Come in!"],
+["het klimaat","climate","zelfst. naamwoord","Het klimaat verandert. = The climate is changing."],
+["de bui","(rain) shower","zelfst. naamwoord","Even schuilen voor de bui. = Shelter from the shower."],
+["het seizoen","season","zelfst. naamwoord","Mijn favoriete seizoen. = My favorite season."],
+["voorspellen","to predict / forecast","werkwoord","Ze voorspellen regen. = They forecast rain."]
+]},
+{t:"Studie & universiteit",w:[
+["de school","school","zelfst. naamwoord","Naast de school is een park. = Next to the school is a park."],
+["de universiteit","university","zelfst. naamwoord","De TU in Eindhoven. = The TU in Eindhoven."],
+["de student","student","zelfst. naamwoord","Ik ben masterstudent. = I am a master's student."],
+["de docent","lecturer / teacher","zelfst. naamwoord","De docent legt goed uit. = The lecturer explains well."],
+["de les","lesson / class","zelfst. naamwoord","De les duurt twee uur. = The class lasts two hours."],
+["het college","lecture","zelfst. naamwoord","Ik heb college om negen uur. = I have a lecture at nine."],
+["het vak","subject / course","zelfst. naamwoord","Cryptologie is een moeilijk vak. = Cryptology is a hard course."],
+["het huiswerk","homework","zelfst. naamwoord","Veel huiswerk deze week. = A lot of homework this week."],
+["het tentamen","exam","zelfst. naamwoord","Het tentamen is in juni. = The exam is in June."],
+["het cijfer","grade / digit","zelfst. naamwoord","Een acht is een goed cijfer. = An eight is a good grade."],
+["slagen","to pass (exam)","werkwoord","Ik ben geslaagd! = I passed!"],
+["zakken","to fail (exam)","werkwoord","Gezakt voor het tentamen. = Failed the exam."],
+["het boek","book","zelfst. naamwoord","Een dik studieboek. = A thick textbook."],
+["het schrift","notebook","zelfst. naamwoord","Schrijf het in je schrift. = Write it in your notebook."],
+["de pen","pen","zelfst. naamwoord","Heb je een pen voor mij? = Do you have a pen for me?"],
+["het potlood","pencil","zelfst. naamwoord","Met potlood schrijven. = Write in pencil."],
+["de laptop","laptop","zelfst. naamwoord","Mijn laptop is snel. = My laptop is fast."],
+["het onderzoek","research","zelfst. naamwoord","Onderzoek naar beveiliging. = Research into security."],
+["de vraag","question","zelfst. naamwoord","Ik heb een vraag. = I have a question."],
+["het antwoord","answer","zelfst. naamwoord","Het goede antwoord. = The correct answer."],
+["de opdracht","assignment","zelfst. naamwoord","De opdracht is af. = The assignment is done."],
+["het rooster","schedule / timetable","zelfst. naamwoord","Mijn rooster is vol. = My schedule is full."],
+["de pauze","break","zelfst. naamwoord","Even pauze nemen. = Take a short break."],
+["de studie","study (program)","zelfst. naamwoord","Mijn studie duurt twee jaar. = My program lasts two years."],
+["studeren","to study","werkwoord","Ik studeer informatiebeveiliging. = I study information security."],
+["uitleggen","to explain","werkwoord","Kun je dat uitleggen? = Can you explain that?"],
+["oefenen","to practice","werkwoord","Elke dag Nederlands oefenen. = Practice Dutch every day."],
+["de taal","language","zelfst. naamwoord","Nederlands is een leuke taal. = Dutch is a fun language."],
+["het woord","word","zelfst. naamwoord","Dertig woorden per dag. = Thirty words a day."],
+["de zin","sentence / desire","zelfst. naamwoord","Maak een zin. = Make a sentence."]
+]},
+{t:"Werk & kantoor",w:[
+["het werk","work","zelfst. naamwoord","Na het werk sport ik. = After work I exercise."],
+["de baan","job","zelfst. naamwoord","Een baan zoeken. = Look for a job."],
+["het kantoor","office","zelfst. naamwoord","Het kantoor is op de campus. = The office is on campus."],
+["de baas","boss","zelfst. naamwoord","Mijn baas is aardig. = My boss is nice."],
+["de werknemer","employee","zelfst. naamwoord","Elke werknemer heeft een contract. = Every employee has a contract."],
+["de werkgever","employer","zelfst. naamwoord","ASML is een grote werkgever. = ASML is a big employer."],
+["de vergadering","meeting","zelfst. naamwoord","De vergadering begint om tien uur. = The meeting starts at ten."],
+["het salaris","salary","zelfst. naamwoord","Het salaris wordt maandelijks betaald. = The salary is paid monthly."],
+["het contract","contract","zelfst. naamwoord","Lees het contract goed. = Read the contract carefully."],
+["solliciteren","to apply (for a job)","werkwoord","Ik solliciteer bij NXP. = I am applying at NXP."],
+["het cv","CV / resume","zelfst. naamwoord","Stuur je cv mee. = Send your CV along."],
+["het sollicitatiegesprek","job interview","zelfst. naamwoord","Morgen heb ik een sollicitatiegesprek. = Tomorrow I have a job interview."],
+["de ervaring","experience","zelfst. naamwoord","Twee jaar ervaring. = Two years of experience."],
+["de stage","internship","zelfst. naamwoord","Een stage bij ASML. = An internship at ASML."],
+["de stagiair","intern","zelfst. naamwoord","De stagiair leert snel. = The intern learns fast."],
+["het bedrijf","company","zelfst. naamwoord","Een techbedrijf in Eindhoven. = A tech company in Eindhoven."],
+["het team","team","zelfst. naamwoord","Ons team is klein. = Our team is small."],
+["het project","project","zelfst. naamwoord","Het project is bijna klaar. = The project is almost done."],
+["de klant","customer / client","zelfst. naamwoord","De klant is koning. = The customer is king."],
+["de afspraak","appointment / agreement","zelfst. naamwoord","Ik heb een afspraak om drie uur. = I have an appointment at three."],
+["plannen","to plan","werkwoord","We plannen een meeting. = We plan a meeting."],
+["de deadline","deadline","zelfst. naamwoord","De deadline is vrijdag. = The deadline is Friday."],
+["het doel","goal / target","zelfst. naamwoord","Mijn doel: duizend woorden. = My goal: a thousand words."],
+["het verslag","report","zelfst. naamwoord","Een verslag schrijven. = Write a report."],
+["de e-mail","email","zelfst. naamwoord","Ik stuur je een e-mail. = I will send you an email."],
+["printen","to print","werkwoord","Het formulier printen. = Print the form."],
+["de printer","printer","zelfst. naamwoord","De printer doet het niet. = The printer is not working."],
+["de taak","task","zelfst. naamwoord","Een nieuwe taak op de lijst. = A new task on the list."],
+["deeltijd","part-time","bijv. naamwoord","Ik werk in deeltijd. = I work part-time."],
+["voltijd","full-time","bijv. naamwoord","Een voltijdbaan na de studie. = A full-time job after graduation."]
+]},
+{t:"Geld & bureaucratie",w:[
+["het geld","money","zelfst. naamwoord","Geld sparen voor de huur. = Save money for rent."],
+["de euro","euro","zelfst. naamwoord","Tien euro per uur. = Ten euros per hour."],
+["de cent","cent","zelfst. naamwoord","Vijftig cent. = Fifty cents."],
+["de bank","bank / sofa","zelfst. naamwoord","Een rekening openen bij de bank. = Open an account at the bank."],
+["de bankrekening","bank account","zelfst. naamwoord","Een Nederlandse bankrekening. = A Dutch bank account."],
+["de pinpas","debit card","zelfst. naamwoord","Betalen met de pinpas. = Pay with the debit card."],
+["pinnen","to pay by card","werkwoord","Alleen pinnen, geen contant. = Card only, no cash."],
+["contant","cash","bijv. naamwoord","Contant betalen kan niet. = Paying cash is not possible."],
+["de portemonnee","wallet","zelfst. naamwoord","Mijn portemonnee is leeg. = My wallet is empty."],
+["de belasting","tax","zelfst. naamwoord","Belasting betalen in Nederland. = Pay tax in the Netherlands."],
+["de verzekering","insurance","zelfst. naamwoord","Een verzekering afsluiten. = Take out insurance."],
+["de zorgverzekering","health insurance","zelfst. naamwoord","Zorgverzekering is verplicht. = Health insurance is mandatory."],
+["het formulier","form","zelfst. naamwoord","Vul het formulier in. = Fill in the form."],
+["invullen","to fill in","werkwoord","Naam en adres invullen. = Fill in name and address."],
+["ondertekenen","to sign","werkwoord","Hier ondertekenen, alstublieft. = Sign here, please."],
+["de handtekening","signature","zelfst. naamwoord","Uw handtekening hier. = Your signature here."],
+["het paspoort","passport","zelfst. naamwoord","Paspoort meenemen naar de gemeente. = Bring passport to the municipality."],
+["het visum","visa","zelfst. naamwoord","Mijn visum is goedgekeurd. = My visa is approved."],
+["de gemeente","municipality","zelfst. naamwoord","Inschrijven bij de gemeente. = Register at the municipality."],
+["het stadhuis","city hall","zelfst. naamwoord","De afspraak is in het stadhuis. = The appointment is at city hall."],
+["de burger","citizen","zelfst. naamwoord","Rechten van de burger. = Rights of the citizen."],
+["inschrijven","to register","werkwoord","Ik schrijf me in voor een BSN. = I register for a BSN."],
+["het document","document","zelfst. naamwoord","Alle documenten meenemen. = Bring all documents."],
+["de kopie","copy","zelfst. naamwoord","Een kopie van je paspoort. = A copy of your passport."],
+["officieel","official","bijv. naamwoord","Een officieel document. = An official document."],
+["geldig","valid","bijv. naamwoord","Is je paspoort nog geldig? = Is your passport still valid?"],
+["verlopen","expired / to expire","bijv. naamwoord","Mijn kaart is verlopen. = My card has expired."],
+["aanvragen","to apply for / request","werkwoord","Een BSN aanvragen. = Apply for a BSN."],
+["de vergunning","permit","zelfst. naamwoord","Een verblijfsvergunning. = A residence permit."],
+["de boete","fine (penalty)","zelfst. naamwoord","Een boete voor fietsen zonder licht. = A fine for cycling without lights."]
+]},
+{t:"Huishouden & verzorging",w:[
+["winkelen","to shop","werkwoord","Zaterdag gaan we winkelen. = Saturday we go shopping."],
+["de kapper","hairdresser","zelfst. naamwoord","Naar de kapper gaan. = Go to the hairdresser."],
+["de was","laundry","zelfst. naamwoord","De was doen. = Do the laundry."],
+["wassen","to wash","werkwoord","Kleren wassen op zestig graden. = Wash clothes at sixty degrees."],
+["de wasmachine","washing machine","zelfst. naamwoord","De wasmachine is bezet. = The washing machine is occupied."],
+["de droger","dryer","zelfst. naamwoord","De droger is kapot. = The dryer is broken."],
+["strijken","to iron","werkwoord","Overhemden strijken. = Iron shirts."],
+["schoonmaken","to clean","werkwoord","De keuken schoonmaken. = Clean the kitchen."],
+["de stofzuiger","vacuum cleaner","zelfst. naamwoord","De stofzuiger staat in de kast. = The vacuum is in the closet."],
+["stofzuigen","to vacuum","werkwoord","Elke week stofzuigen. = Vacuum every week."],
+["de afwas","dishes (washing up)","zelfst. naamwoord","De afwas staat er nog. = The dishes are still there."],
+["afwassen","to do the dishes","werkwoord","Wie gaat er afwassen? = Who is doing the dishes?"],
+["de vuilnis","garbage","zelfst. naamwoord","De vuilnis buiten zetten. = Put the garbage out."],
+["de vuilnisbak","trash bin","zelfst. naamwoord","De vuilnisbak is vol. = The trash bin is full."],
+["weggooien","to throw away","werkwoord","Gooi het niet weg. = Do not throw it away."],
+["recyclen","to recycle","werkwoord","Glas en papier recyclen. = Recycle glass and paper."],
+["de zeep","soap","zelfst. naamwoord","Handen wassen met zeep. = Wash hands with soap."],
+["de shampoo","shampoo","zelfst. naamwoord","Shampoo is bijna op. = Shampoo is almost gone."],
+["de tandpasta","toothpaste","zelfst. naamwoord","Tandpasta niet vergeten. = Do not forget toothpaste."],
+["de tandenborstel","toothbrush","zelfst. naamwoord","Een nieuwe tandenborstel. = A new toothbrush."],
+["de handdoek","towel","zelfst. naamwoord","Een schone handdoek. = A clean towel."],
+["het toiletpapier","toilet paper","zelfst. naamwoord","Toiletpapier op de lijst. = Toilet paper on the list."],
+["de spiegel","mirror","zelfst. naamwoord","Kijk in de spiegel. = Look in the mirror."],
+["de schaar","scissors","zelfst. naamwoord","Waar is de schaar? = Where are the scissors?"],
+["het gereedschap","tools","zelfst. naamwoord","Gereedschap voor de fiets. = Tools for the bike."],
+["de hamer","hammer","zelfst. naamwoord","Een hamer en spijkers. = A hammer and nails."],
+["de schroef","screw","zelfst. naamwoord","Een losse schroef. = A loose screw."],
+["de batterij","battery","zelfst. naamwoord","De batterij is leeg. = The battery is dead."],
+["opladen","to charge","werkwoord","Mijn telefoon opladen. = Charge my phone."],
+["de oplader","charger","zelfst. naamwoord","Oplader vergeten, natuurlijk. = Forgot the charger, of course."]
+]},
+{t:"Hobby's, sport & vrije tijd",w:[
+["de hobby","hobby","zelfst. naamwoord","Muziek is mijn hobby. = Music is my hobby."],
+["de sport","sport","zelfst. naamwoord","Welke sport doe je? = What sport do you do?"],
+["sporten","to exercise","werkwoord","Ik sport drie keer per week. = I exercise three times a week."],
+["het voetbal","football / soccer","zelfst. naamwoord","Voetbal kijken in de kroeg. = Watch football in the pub."],
+["de wedstrijd","match / competition","zelfst. naamwoord","De wedstrijd begint om acht uur. = The match starts at eight."],
+["het doelpunt","goal (scored)","zelfst. naamwoord","Een prachtig doelpunt! = A beautiful goal!"],
+["zwemmen","to swim","werkwoord","Zwemmen in het meer. = Swim in the lake."],
+["het zwembad","swimming pool","zelfst. naamwoord","Het zwembad is open. = The pool is open."],
+["rennen","to run","werkwoord","Rennen voor de trein. = Run for the train."],
+["hardlopen","to go running / jog","werkwoord","Ik ga hardlopen in het park. = I go running in the park."],
+["de sportschool","gym","zelfst. naamwoord","Naar de sportschool op de campus. = To the gym on campus."],
+["trainen","to train","werkwoord","Twee keer per week trainen. = Train twice a week."],
+["het spel","game","zelfst. naamwoord","Een leuk spel. = A fun game."],
+["de muziek","music","zelfst. naamwoord","Ik hou van muziek. = I love music."],
+["het lied","song","zelfst. naamwoord","Een Nederlands lied. = A Dutch song."],
+["zingen","to sing","werkwoord","Zingen onder de douche. = Sing in the shower."],
+["dansen","to dance","werkwoord","Dansen op het festival. = Dance at the festival."],
+["de gitaar","guitar","zelfst. naamwoord","Ik speel gitaar. = I play guitar."],
+["de fluit","flute","zelfst. naamwoord","Ik speel ook fluit. = I also play flute."],
+["de film","movie","zelfst. naamwoord","Een film kijken vanavond. = Watch a movie tonight."],
+["de serie","series","zelfst. naamwoord","Een nieuwe serie op Netflix. = A new series on Netflix."],
+["de foto","photo","zelfst. naamwoord","Een foto maken. = Take a photo."],
+["fotograferen","to photograph","werkwoord","Ik fotografeer graag. = I like taking photos."],
+["tekenen","to draw","werkwoord","Een plattegrond tekenen. = Draw a floor plan."],
+["schilderen","to paint","werkwoord","De muur schilderen. = Paint the wall."],
+["het strand","beach","zelfst. naamwoord","Naar het strand in Zeeland. = To the beach in Zeeland."],
+["het festival","festival","zelfst. naamwoord","Een muziekfestival in de zomer. = A music festival in summer."],
+["de vakantie","vacation / holiday","zelfst. naamwoord","Fijne vakantie! = Have a nice holiday!"],
+["kamperen","to camp","werkwoord","Kamperen aan het meer. = Camp by the lake."],
+["wandelen","to hike / stroll","werkwoord","Zondag gaan we wandelen. = Sunday we go hiking."]
+]},
+{t:"Natuur & dieren",w:[
+["de natuur","nature","zelfst. naamwoord","De natuur in Nederland is plat. = Nature in the Netherlands is flat."],
+["het bos","forest","zelfst. naamwoord","Wandelen in het bos. = Walk in the forest."],
+["de boom","tree","zelfst. naamwoord","Een oude boom. = An old tree."],
+["de bloem","flower","zelfst. naamwoord","Bloemen voor de buurvrouw. = Flowers for the neighbor."],
+["het gras","grass","zelfst. naamwoord","Zitten in het gras. = Sit in the grass."],
+["het blad","leaf / sheet","zelfst. naamwoord","De bladeren vallen. = The leaves are falling."],
+["de plant","plant","zelfst. naamwoord","Een plant voor de kamer. = A plant for the room."],
+["de tuin","garden","zelfst. naamwoord","Een kleine tuin achter het huis. = A small garden behind the house."],
+["de rivier","river","zelfst. naamwoord","De rivier de Dommel. = The river Dommel."],
+["het meer","lake","zelfst. naamwoord","Zwemmen in het meer. = Swim in the lake."],
+["de zee","sea","zelfst. naamwoord","De Noordzee is koud. = The North Sea is cold."],
+["het eiland","island","zelfst. naamwoord","Texel is een eiland. = Texel is an island."],
+["de berg","mountain","zelfst. naamwoord","Nederland heeft geen bergen. = The Netherlands has no mountains."],
+["de heuvel","hill","zelfst. naamwoord","Limburg heeft heuvels. = Limburg has hills."],
+["het dier","animal","zelfst. naamwoord","Welk dier vind je leuk? = Which animal do you like?"],
+["de hond","dog","zelfst. naamwoord","De hond van de buren. = The neighbors' dog."],
+["de kat","cat","zelfst. naamwoord","De kat slaapt de hele dag. = The cat sleeps all day."],
+["de vogel","bird","zelfst. naamwoord","Vogels in de tuin. = Birds in the garden."],
+["de koe","cow","zelfst. naamwoord","Koeien in de wei. = Cows in the meadow."],
+["het paard","horse","zelfst. naamwoord","Een paard op de boerderij. = A horse on the farm."],
+["het schaap","sheep","zelfst. naamwoord","Schapen op de dijk. = Sheep on the dike."],
+["het varken","pig","zelfst. naamwoord","Een roze varken. = A pink pig."],
+["de muis","mouse","zelfst. naamwoord","Een muis in de keuken! = A mouse in the kitchen!"],
+["de eend","duck","zelfst. naamwoord","Eenden in de gracht. = Ducks in the canal."],
+["de bij","bee","zelfst. naamwoord","Bijen zijn belangrijk. = Bees are important."],
+["de vlinder","butterfly","zelfst. naamwoord","Een kleurrijke vlinder. = A colorful butterfly."],
+["de spin","spider","zelfst. naamwoord","Een spin in de hoek. = A spider in the corner."],
+["de mug","mosquito","zelfst. naamwoord","Muggen in de zomer. = Mosquitoes in summer."],
+["de maan","moon","zelfst. naamwoord","Volle maan vanavond. = Full moon tonight."],
+["de ster","star","zelfst. naamwoord","Sterren kijken. = Stargazing."]
+]}
+);
+</script>
+<script>
+DATA.push(
+{t:"Gevoelens & karakter",w:[
+["het gevoel","feeling","zelfst. naamwoord","Een goed gevoel over het gesprek. = A good feeling about the interview."],
+["de liefde","love","zelfst. naamwoord","Liefde voor muziek. = Love for music."],
+["de angst","fear","zelfst. naamwoord","Angst voor tentamens. = Fear of exams."],
+["de hoop","hope","zelfst. naamwoord","Hoop op goed nieuws. = Hope for good news."],
+["de droom","dream","zelfst. naamwoord","Een droom komt uit. = A dream comes true."],
+["dromen","to dream","werkwoord","Ik droom in het Nederlands! = I dream in Dutch!"],
+["aardig","kind / nice","bijv. naamwoord","Een aardige huisgenoot. = A kind housemate."],
+["vriendelijk","friendly","bijv. naamwoord","Vriendelijke buren. = Friendly neighbors."],
+["eerlijk","honest","bijv. naamwoord","Eerlijk duurt het langst. = Honesty lasts longest (saying)."],
+["slim","smart","bijv. naamwoord","Een slimme oplossing. = A smart solution."],
+["dom","stupid","bijv. naamwoord","Een domme fout. = A stupid mistake."],
+["grappig","funny","bijv. naamwoord","Een grappig verhaal. = A funny story."],
+["serieus","serious","bijv. naamwoord","Een serieus gesprek. = A serious conversation."],
+["verlegen","shy","bijv. naamwoord","Hij is een beetje verlegen. = He is a bit shy."],
+["brutaal","cheeky / bold","bijv. naamwoord","Een brutale vraag. = A cheeky question."],
+["geduldig","patient","bijv. naamwoord","Wees geduldig met jezelf. = Be patient with yourself."],
+["lui","lazy","bijv. naamwoord","Een luie zondag. = A lazy Sunday."],
+["ijverig","diligent / hardworking","bijv. naamwoord","Een ijverige student. = A diligent student."],
+["nieuwsgierig","curious","bijv. naamwoord","Nieuwsgierig naar Nederland. = Curious about the Netherlands."],
+["gek","crazy / mad","bijv. naamwoord","Gek op kaas. = Crazy about cheese."],
+["streng","strict","bijv. naamwoord","Een strenge docent. = A strict teacher."],
+["beleefd","polite","bijv. naamwoord","Beleefd blijven. = Stay polite."],
+["onbeleefd","rude","bijv. naamwoord","Dat is onbeleefd. = That is rude."],
+["jaloers","jealous","bijv. naamwoord","Jaloers op zijn fiets. = Jealous of his bike."],
+["dankbaar","grateful","bijv. naamwoord","Dankbaar voor de hulp. = Grateful for the help."],
+["tevreden","satisfied","bijv. naamwoord","Tevreden met het resultaat. = Satisfied with the result."],
+["teleurgesteld","disappointed","bijv. naamwoord","Teleurgesteld over het cijfer. = Disappointed about the grade."],
+["zenuwachtig","nervous","bijv. naamwoord","Zenuwachtig voor het tentamen. = Nervous for the exam."],
+["enthousiast","enthusiastic","bijv. naamwoord","Enthousiast over het project. = Enthusiastic about the project."],
+["kalm","calm","bijv. naamwoord","Blijf kalm. = Stay calm."]
+]},
+{t:"Communicatie & techniek",w:[
+["de telefoon","telephone","zelfst. naamwoord","De telefoon gaat. = The phone is ringing."],
+["de mobiel","mobile phone","zelfst. naamwoord","Mijn mobiel is bijna leeg. = My phone is almost dead."],
+["het bericht","message","zelfst. naamwoord","Een bericht sturen. = Send a message."],
+["appen","to text (WhatsApp)","werkwoord","App me even. = Text me."],
+["het internet","internet","zelfst. naamwoord","Snel internet in de kamer. = Fast internet in the room."],
+["de website","website","zelfst. naamwoord","De website van de gemeente. = The municipality's website."],
+["het wachtwoord","password","zelfst. naamwoord","Een sterk wachtwoord kiezen. = Choose a strong password."],
+["inloggen","to log in","werkwoord","Inloggen met je student-ID. = Log in with your student ID."],
+["uitloggen","to log out","werkwoord","Vergeet niet uit te loggen. = Do not forget to log out."],
+["downloaden","to download","werkwoord","De app downloaden. = Download the app."],
+["het bestand","file","zelfst. naamwoord","Het bestand is te groot. = The file is too big."],
+["de computer","computer","zelfst. naamwoord","De computer start op. = The computer is starting."],
+["het scherm","screen","zelfst. naamwoord","Een groot scherm. = A big screen."],
+["het toetsenbord","keyboard","zelfst. naamwoord","Een Nederlands toetsenbord. = A Dutch keyboard."],
+["de app","app","zelfst. naamwoord","Een app voor de trein. = An app for the train."],
+["de video","video","zelfst. naamwoord","Een video bekijken. = Watch a video."],
+["het nieuws","news","zelfst. naamwoord","Het nieuws van acht uur. = The eight o'clock news."],
+["de krant","newspaper","zelfst. naamwoord","De krant lezen. = Read the newspaper."],
+["het tijdschrift","magazine","zelfst. naamwoord","Een tijdschrift voor onderweg. = A magazine for the trip."],
+["de radio","radio","zelfst. naamwoord","Naar de radio luisteren. = Listen to the radio."],
+["de televisie","television","zelfst. naamwoord","Televisie kijken. = Watch television."],
+["het programma","program","zelfst. naamwoord","Een leuk programma. = A fun program."],
+["de zender","channel / station","zelfst. naamwoord","Een andere zender. = Another channel."],
+["opnemen","to record / pick up (phone)","werkwoord","Hij neemt niet op. = He is not picking up."],
+["de brief","letter","zelfst. naamwoord","Een brief van de gemeente. = A letter from the municipality."],
+["de post","mail / post","zelfst. naamwoord","Is er post voor mij? = Is there mail for me?"],
+["de postzegel","stamp","zelfst. naamwoord","Een postzegel voor India. = A stamp for India."],
+["de envelop","envelope","zelfst. naamwoord","Doe de brief in de envelop. = Put the letter in the envelope."],
+["versturen","to send (off)","werkwoord","Het pakket versturen. = Send the package."],
+["de verbinding","connection","zelfst. naamwoord","De verbinding is slecht. = The connection is bad."]
+]},
+{t:"Verbindingswoorden",w:[
+["en","and","voegwoord","Brood en kaas. = Bread and cheese."],
+["of","or / whether","voegwoord","Koffie of thee? = Coffee or tea?"],
+["maar","but","voegwoord","Duur, maar goed. = Expensive, but good."],
+["want","because (main clause)","voegwoord","Ik blijf thuis, want het regent. = I stay home, because it rains."],
+["omdat","because (sub clause)","voegwoord","Ik fiets omdat het gezond is. = I cycle because it is healthy."],
+["dus","so / therefore","voegwoord","Het regent, dus neem een jas. = It rains, so take a coat."],
+["als","if / when","voegwoord","Als het regent, blijf ik binnen. = If it rains, I stay inside."],
+["toen","then / when (past)","voegwoord","Toen ik jong was... = When I was young..."],
+["dan","then","bijwoord","Eerst leren, dan spelen. = First study, then play."],
+["hoewel","although","voegwoord","Hoewel het regent, fiets ik. = Although it rains, I cycle."],
+["terwijl","while","voegwoord","Ik luister terwijl ik kook. = I listen while I cook."],
+["voordat","before","voegwoord","Voordat je gaat, eet iets. = Before you go, eat something."],
+["nadat","after","voegwoord","Nadat ik at, studeerde ik. = After I ate, I studied."],
+["zodat","so that","voegwoord","Ik oefen zodat ik het leer. = I practice so that I learn it."],
+["niet","not","bijwoord","Ik weet het niet. = I do not know."],
+["geen","no / not a","bijwoord","Ik heb geen auto. = I have no car."],
+["wel","indeed / do (contrast)","bijwoord","Ik kom wel! = I AM coming!"],
+["nog","still / yet","bijwoord","Nog vijf minuten. = Five more minutes."],
+["zelfs","even","bijwoord","Zelfs in de regen fietsen ze. = Even in the rain they cycle."],
+["bijna","almost","bijwoord","Bijna klaar! = Almost done!"],
+["ongeveer","approximately","bijwoord","Ongeveer tien euro. = About ten euros."],
+["precies","exactly","bijwoord","Precies om negen uur. = Exactly at nine."],
+["eigenlijk","actually","bijwoord","Eigenlijk best makkelijk. = Actually quite easy."],
+["trouwens","by the way","bijwoord","Trouwens, bedankt nog! = By the way, thanks again!"],
+["tenminste","at least","bijwoord","Tenminste dertig woorden per dag. = At least thirty words a day."],
+["bijvoorbeeld","for example","bijwoord","Steden, bijvoorbeeld Eindhoven. = Cities, for example Eindhoven."],
+["enzovoort","etcetera","bijwoord","Brood, kaas, melk, enzovoort. = Bread, cheese, milk, etcetera."],
+["daarom","that is why","bijwoord","Daarom leer ik Nederlands. = That is why I learn Dutch."],
+["daarna","after that","bijwoord","Eerst dag 1, daarna dag 2. = First day 1, after that day 2."],
+["eerst","first","bijwoord","Eerst herhalen, dan leren. = First review, then learn."]
+]},
+{t:"Bijwoorden & gradatie",w:[
+["heel","very / whole","bijwoord","Heel goed gedaan! = Very well done!"],
+["erg","very / bad","bijwoord","Erg lekker. = Very tasty."],
+["zeer","very (formal)","bijwoord","Zeer geachte heer... = Dear sir... (formal)"],
+["te","too","bijwoord","Te duur voor mij. = Too expensive for me."],
+["genoeg","enough","bijwoord","Genoeg voor vandaag. = Enough for today."],
+["zo","so / like this","bijwoord","Zo doe je dat. = This is how you do it."],
+["meestal","usually","bijwoord","Meestal fiets ik. = Usually I cycle."],
+["zelden","rarely","bijwoord","Ik ben zelden ziek. = I am rarely sick."],
+["meteen","immediately","bijwoord","Ik kom meteen. = I am coming right away."],
+["direct","directly / immediately","bijwoord","Direct na het college. = Right after the lecture."],
+["even","just / a moment","bijwoord","Wacht even. = Wait a moment."],
+["alvast","already / in advance","bijwoord","Alvast bedankt! = Thanks in advance!"],
+["weer","again / weather","bijwoord","Tot de volgende keer weer! = Until next time again!"],
+["opnieuw","again / anew","bijwoord","Probeer het opnieuw. = Try it again."],
+["steeds","constantly / increasingly","bijwoord","Het wordt steeds beter. = It keeps getting better."],
+["net","just (now)","bijwoord","Ik ben er net. = I just arrived."],
+["pas","only just / not until","bijwoord","Pas om tien uur open. = Not open until ten."],
+["ooit","ever / someday","bijwoord","Ben je ooit in Amsterdam geweest? = Have you ever been to Amsterdam?"],
+["waarschijnlijk","probably","bijwoord","Waarschijnlijk regent het morgen. = It will probably rain tomorrow."],
+["helaas","unfortunately","bijwoord","Helaas is het vol. = Unfortunately it is full."],
+["gelukkig","fortunately / happy","bijwoord","Gelukkig is het droog. = Fortunately it is dry."],
+["blijkbaar","apparently","bijwoord","Blijkbaar is dat normaal hier. = Apparently that is normal here."],
+["absoluut","absolutely","bijwoord","Absoluut de moeite waard. = Absolutely worth it."],
+["nauwelijks","hardly","bijwoord","Ik kan het nauwelijks geloven. = I can hardly believe it."],
+["vooral","especially","bijwoord","Vooral in de winter. = Especially in winter."],
+["verder","further / moreover","bijwoord","Verder nog iets? = Anything else?"],
+["overal","everywhere","bijwoord","Fietsen staan overal. = Bikes are everywhere."],
+["nergens","nowhere","bijwoord","Nergens te vinden. = Nowhere to be found."],
+["ergens","somewhere","bijwoord","Ergens in het centrum. = Somewhere in the center."],
+["thuis","at home","bijwoord","Lekker thuis blijven. = Nice to stay home."]
+]},
+{t:"Voorzetsels",w:[
+["in","in","voorzetsel","In de trein. = On the train."],
+["op","on / at","voorzetsel","Op tafel. = On the table."],
+["onder","under","voorzetsel","Onder de brug. = Under the bridge."],
+["boven","above / upstairs","voorzetsel","Boven de deur. = Above the door."],
+["naast","next to","voorzetsel","Naast het station. = Next to the station."],
+["tussen","between","voorzetsel","Tussen twaalf en een. = Between twelve and one."],
+["achter","behind","voorzetsel","Achter het huis. = Behind the house."],
+["voor","for / in front of","voorzetsel","Voor de deur. = In front of the door."],
+["uit","out of / from","voorzetsel","Ik kom uit India. = I come from India."],
+["naar","to / towards","voorzetsel","Naar de campus. = To the campus."],
+["van","of / from","voorzetsel","De fiets van mijn broer. = My brother's bike."],
+["met","with","voorzetsel","Met de trein. = By train."],
+["zonder","without","voorzetsel","Zonder suiker. = Without sugar."],
+["bij","at / near / with","voorzetsel","Bij de supermarkt. = At the supermarket."],
+["door","through / by","voorzetsel","Door het park fietsen. = Cycle through the park."],
+["over","over / about","voorzetsel","Over de brug. = Over the bridge."],
+["tegen","against / to","voorzetsel","Tegen de muur. = Against the wall."],
+["langs","along / past","voorzetsel","Langs de rivier lopen. = Walk along the river."],
+["tot","until / to","voorzetsel","Tot morgen! = Until tomorrow!"],
+["sinds","since","voorzetsel","Sinds augustus woon ik hier. = I have lived here since August."],
+["tijdens","during","voorzetsel","Tijdens het college. = During the lecture."],
+["vanaf","from (time/place)","voorzetsel","Vanaf september. = From September."],
+["per","per / by","voorzetsel","Zestien uur per week. = Sixteen hours per week."],
+["volgens","according to","voorzetsel","Volgens het rooster. = According to the schedule."],
+["ondanks","despite","voorzetsel","Ondanks de regen. = Despite the rain."],
+["richting","towards / direction","voorzetsel","Richting het centrum. = Towards the center."],
+["tegenover","opposite","voorzetsel","Tegenover de bibliotheek. = Opposite the library."],
+["om","at (time) / around","voorzetsel","Om negen uur. = At nine o'clock."],
+["aan","on / at / to","voorzetsel","Aan de muur. = On the wall."],
+["binnen","within / inside","voorzetsel","Binnen een week. = Within a week."]
+]},
+{t:"Keuken & huisraad",w:[
+["de koelkast","fridge","zelfst. naamwoord","Melk in de koelkast. = Milk in the fridge."],
+["de vriezer","freezer","zelfst. naamwoord","IJs in de vriezer. = Ice cream in the freezer."],
+["de oven","oven","zelfst. naamwoord","De oven voorverwarmen. = Preheat the oven."],
+["de magnetron","microwave","zelfst. naamwoord","Even in de magnetron. = Just in the microwave."],
+["het fornuis","stove","zelfst. naamwoord","Een gasfornuis of elektrisch? = A gas stove or electric?"],
+["de kookplaat","hob / cooktop","zelfst. naamwoord","Een inductiekookplaat. = An induction hob."],
+["de pan","pan / pot","zelfst. naamwoord","Rijst in de pan. = Rice in the pot."],
+["de koekenpan","frying pan","zelfst. naamwoord","Een ei in de koekenpan. = An egg in the frying pan."],
+["de waterkoker","kettle","zelfst. naamwoord","De waterkoker voor thee. = The kettle for tea."],
+["de gootsteen","(kitchen) sink","zelfst. naamwoord","Afwas in de gootsteen. = Dishes in the sink."],
+["de kraan","tap / faucet","zelfst. naamwoord","Water uit de kraan. = Water from the tap."],
+["de vaatwasser","dishwasher","zelfst. naamwoord","De vaatwasser inruimen. = Load the dishwasher."],
+["het aanrecht","kitchen counter","zelfst. naamwoord","Een schoon aanrecht. = A clean counter."],
+["de la","drawer","zelfst. naamwoord","Bestek in de la. = Cutlery in the drawer."],
+["de plank","shelf / plank","zelfst. naamwoord","Boeken op de plank. = Books on the shelf."],
+["de prullenbak","waste bin","zelfst. naamwoord","In de prullenbak gooien. = Throw in the bin."],
+["de bank","sofa / bank","zelfst. naamwoord","Op de bank een serie kijken. = Watch a series on the sofa."],
+["het kussen","pillow / cushion","zelfst. naamwoord","Een extra kussen. = An extra pillow."],
+["de deken","blanket","zelfst. naamwoord","Een warme deken. = A warm blanket."],
+["het laken","(bed) sheet","zelfst. naamwoord","Schone lakens. = Clean sheets."],
+["het gordijn","curtain","zelfst. naamwoord","De gordijnen dicht. = Close the curtains."],
+["de verwarming","heating / radiator","zelfst. naamwoord","De verwarming aanzetten. = Turn on the heating."],
+["de ventilator","fan","zelfst. naamwoord","Een ventilator in de zomer. = A fan in summer."],
+["de stekker","plug","zelfst. naamwoord","De stekker in het stopcontact. = The plug in the socket."],
+["het stopcontact","power socket","zelfst. naamwoord","Een stopcontact naast het bed. = A socket next to the bed."],
+["de schakelaar","switch","zelfst. naamwoord","De schakelaar bij de deur. = The switch by the door."],
+["de zaklamp","flashlight","zelfst. naamwoord","Een zaklamp voor noodgevallen. = A flashlight for emergencies."],
+["de kaars","candle","zelfst. naamwoord","Kaarsen voor de gezelligheid. = Candles for coziness."],
+["de emmer","bucket","zelfst. naamwoord","Een emmer water. = A bucket of water."],
+["de bezem","broom","zelfst. naamwoord","Vegen met de bezem. = Sweep with the broom."]
+]},
+{t:"Nederlands leven & officieel",w:[
+["de fietsenstalling","bike parking","zelfst. naamwoord","De fietsenstalling bij het station. = The bike parking at the station."],
+["de gracht","canal","zelfst. naamwoord","De grachten van Amsterdam. = The canals of Amsterdam."],
+["de molen","windmill / mill","zelfst. naamwoord","Een oude molen. = An old windmill."],
+["de tulp","tulip","zelfst. naamwoord","Tulpen uit Amsterdam. = Tulips from Amsterdam."],
+["de klomp","clog","zelfst. naamwoord","Klompen als souvenir. = Clogs as a souvenir."],
+["gezellig","cozy / convivial (untranslatable!)","bijv. naamwoord","Wat gezellig! = How cozy/fun! (very Dutch)"],
+["de borrel","drinks (social)","zelfst. naamwoord","Vrijdagmiddagborrel met collega's. = Friday afternoon drinks with colleagues."],
+["het terras","terrace / patio","zelfst. naamwoord","Op het terras in de zon. = On the terrace in the sun."],
+["de traktatie","treat (you treat on YOUR birthday)","zelfst. naamwoord","Een traktatie voor de groep. = A treat for the group."],
+["de agenda","calendar / planner","zelfst. naamwoord","Even in mijn agenda kijken. = Let me check my calendar."],
+["de tandarts","dentist","zelfst. naamwoord","Twee keer per jaar naar de tandarts. = To the dentist twice a year."],
+["het ziekenhuis","hospital","zelfst. naamwoord","Het ziekenhuis is groot. = The hospital is big."],
+["de spoed","urgency / ER","zelfst. naamwoord","Met spoed naar het ziekenhuis. = Urgently to the hospital."],
+["de politie","police","zelfst. naamwoord","De politie helpt je. = The police help you."],
+["de brandweer","fire brigade","zelfst. naamwoord","Bel de brandweer! = Call the fire brigade!"],
+["de ambulance","ambulance","zelfst. naamwoord","112 voor een ambulance. = 112 for an ambulance."],
+["het noodgeval","emergency","zelfst. naamwoord","Alleen voor noodgevallen. = For emergencies only."],
+["de regel","rule","zelfst. naamwoord","Regels zijn regels. = Rules are rules."],
+["de wet","law","zelfst. naamwoord","Dat is verboden bij wet. = That is forbidden by law."],
+["het recht","right / law (field)","zelfst. naamwoord","Je hebt het recht om te vragen. = You have the right to ask."],
+["de plicht","duty / obligation","zelfst. naamwoord","Rechten en plichten. = Rights and duties."],
+["de vrijheid","freedom","zelfst. naamwoord","Vrijheid is belangrijk hier. = Freedom is important here."],
+["de overheid","government","zelfst. naamwoord","Een brief van de overheid. = A letter from the government."],
+["de koning","king","zelfst. naamwoord","Koningsdag is in april. = King's Day is in April."],
+["de fietser","cyclist","zelfst. naamwoord","Fietsers hebben vaak voorrang. = Cyclists often have right of way."],
+["de voetganger","pedestrian","zelfst. naamwoord","Pas op voor voetgangers. = Watch out for pedestrians."],
+["het fietspad","bike path","zelfst. naamwoord","Blijf op het fietspad. = Stay on the bike path."],
+["de rotonde","roundabout","zelfst. naamwoord","Rechts op de rotonde. = Right at the roundabout."],
+["de file","traffic jam","zelfst. naamwoord","File op de A2. = Traffic jam on the A2."],
+["de klacht","complaint","zelfst. naamwoord","Een klacht indienen. = File a complaint."]
+]}
+);
+</script>
+<script>init();</script>
+</body>
+</html>
