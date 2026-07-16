@@ -131,6 +131,8 @@ header{
 .card .idx{position:absolute;top:4px;left:7px;font-family:'Inter';font-size:9px;font-weight:500;color:var(--muted);opacity:.7}
 .card.g .idx{color:var(--green)}
 .card.r .idx{color:var(--red)}
+body:not(.show-idx) .card .idx{display:none}
+.card:not(.g):not(.r):hover{border-color:var(--delft)}
 
 /* ---------- popup / bottom sheet ---------- */
 .sheet{
@@ -211,6 +213,16 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 .sheet .conj .conjlab{display:block;font-size:9.5px;font-weight:600;letter-spacing:.12em;
   text-transform:uppercase;color:var(--tulip);margin-bottom:2px}
 
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.segb{border:none;background:none;padding:6px 13px;font-family:'Archivo';font-weight:800;font-size:12px;
+  letter-spacing:.05em;color:var(--muted);cursor:pointer}
+.segb.active{background:var(--activebg);color:var(--activefg)}
+.helpb{display:inline-flex;align-items:center;gap:6px;font-family:'Archivo';font-weight:700;font-size:12.5px}
+.tgl.on{border-style:solid;border-color:var(--tulip);color:var(--tulip)}
+.peak.summit .bar{overflow:visible}
+.peak.summit .bar::before{content:"";position:absolute;top:-13px;left:calc(50% - 1px);width:2px;height:13px;background:var(--ink)}
+.peak.summit .bar::after{content:"";position:absolute;top:-13px;left:calc(50% + 1px);width:0;height:0;
+  border-left:10px solid var(--tulip);border-top:4px solid transparent;border-bottom:4px solid transparent}
 .scbtn{font-family:'Archivo';font-weight:700;font-size:12.5px;letter-spacing:.01em;
   background:var(--card);color:var(--muted);border:1.5px solid var(--line);
   border-radius:999px;padding:6px 14px;cursor:pointer}
@@ -261,9 +273,12 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
         <div class="big"><span id="totGreen">0</span> / 1020</div>
         <div class="sub"><span data-i18n="subTotals">woorden gekend</span> &middot; <span id="totPct">0%</span> <span data-i18n="subBerg">van de berg</span></div>
       </div>
-      <button class="theme" id="langBtn" title="Switch UI language">EN</button>
-      <button class="theme" id="helpBtn" title="Uitleg / Guide">?</button>
-      <button class="theme" id="themeBtn" title="Licht / donker">&#127769;</button>
+      <div class="seg" id="langSeg" role="group" aria-label="Interface language">
+        <button class="segb active" data-lang="nl">NL</button>
+        <button class="segb" data-lang="en">EN</button>
+      </div>
+      <button class="theme helpb" id="helpBtn">&#128214; <span data-i18n="guide">Gids</span></button>
+      <button class="theme" id="themeBtn" title="Licht / donker &middot; Light / dark">&#127769;</button>
     </div>
   </header>
 
@@ -277,7 +292,8 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
       <button class="reset" id="resetBtn" title="Wis markeringen van deze dag">reset dag</button>
       <button class="reset" id="expBtn" title="Kopieer je voortgang als code (voor ander apparaat of back-up)">export</button>
       <button class="reset" id="impBtn" title="Plak een voortgang-code van een ander apparaat">import</button>
-      <button class="reset" id="autoBtn" title="Spreek elk woord uit bij navigeren">&#128266; auto: uit</button>
+      <button class="reset tgl" id="idxBtn" title="Toon/verberg nummers op kaartjes">#</button>
+      <button class="reset tgl" id="autoBtn" title="Spreek elk woord uit bij navigeren">&#128266; auto: uit</button>
     </div>
   </div>
   <div class="routine" id="routine"></div>
@@ -349,6 +365,7 @@ let filter = "all";                           // all | forgot | unmarked
 let scope = "cum";                            // cum (day 1..N) | solo (day N only)
 let lang = "nl";                              // ui language: nl | en
 let autoSpeak = false;
+let showIdx = false;                          // card numbers hidden by default
 let marks = {};                               // "d-i" -> 1 green | 2 red
 let mem = false, saveTimer = null;
 let VIS = [], ELS = [], SECCOUNTS = [];
@@ -380,6 +397,7 @@ nl:{
   fAll:"Alles", fForgot:"Alleen vergeten", fUnmarked:"Alleen ongemarkeerd",
   reset:"reset dag", export:"export", import:"import",
   auto:"auto-uitspraak", on:"aan", off:"uit",
+  guide:"Gids", numbers:"nummers",
   known2:"gekend", forgot2:"vergeten", words:"woorden",
   neww:"nieuw", review:"herhaling", allMixed:"Alle {n} woorden \u2014 gemengd",
   routineD1:"De berg tot hier: <b>30 woorden</b>. Morgen: dag 1 herhalen + dag 2 leren.",
@@ -408,6 +426,7 @@ en:{
   fAll:"All", fForgot:"Forgotten only", fUnmarked:"Unmarked only",
   reset:"reset day", export:"export", import:"import",
   auto:"auto-speak", on:"on", off:"off",
+  guide:"Guide", numbers:"numbers",
   known2:"known", forgot2:"forgotten", words:"words",
   neww:"new", review:"review", allMixed:"All {n} words \u2014 mixed",
   routineD1:"The mountain so far: <b>30 words</b>. Tomorrow: review day 1 + learn day 2.",
@@ -495,10 +514,13 @@ function applyLang(){
   $("btnG").innerHTML = t("knownBtn")+" &middot; G";
   $("btnF").innerHTML = t("forgotBtn")+" &middot; F";
   $("btnX").innerHTML = t("clearBtn")+" &middot; X";
-  $("expBtn").textContent = t("export");
-  $("impBtn").textContent = t("import");
+  $("expBtn").innerHTML = "&#8593; "+t("export");
+  $("impBtn").innerHTML = "&#8595; "+t("import");
   $("autoBtn").innerHTML = "&#128266; "+t("auto")+": "+(autoSpeak ? t("on") : t("off"));
-  $("langBtn").textContent = lang==="nl" ? "EN" : "NL";
+  $("autoBtn").classList.toggle("on", autoSpeak);
+  $("idxBtn").innerHTML = "# "+t("numbers")+": "+(showIdx ? t("on") : t("off"));
+  $("idxBtn").classList.toggle("on", showIdx);
+  document.querySelectorAll("#langSeg .segb").forEach(b=> b.classList.toggle("active", b.dataset.lang===lang));
   $("helpBody").innerHTML = HELP[lang];
   if(mem){ $("storageNote").textContent = t("storageNone"); }
 }
@@ -523,8 +545,9 @@ function applyState(s){
   if(s.lang) lang = s.lang;
   if(s.scope) scope = s.scope;
   if(typeof s.autoSpeak === "boolean") autoSpeak = s.autoSpeak;
+  if(typeof s.showIdx === "boolean") showIdx = s.showIdx;
 }
-function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak}); }
+function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak, showIdx:showIdx}); }
 async function load(){
   try{
     if(backend==="artifact"){
@@ -674,7 +697,7 @@ function renderMountain(){
     const g = dayGreen(d);
     const h = 26 + Math.round((d/(n-1))*54);
     const b = document.createElement("button");
-    b.className = "peak" + (d===day?" active":"") + (g===30?" done":"") + (d<=day?" inrange":"");
+    b.className = "peak" + (d===day?" active":"") + (g===30?" done":"") + (d<=day?" inrange":"") + (d===n-1?" summit":"");
     b.innerHTML =
       '<div class="bar" style="height:'+h+'px">' +
         '<div class="fill'+(g<30?" partial":"")+'" style="height:'+Math.round(g/30*100)+'%"></div>' +
@@ -766,7 +789,7 @@ function renderGrid(){
     SECCOUNTS.push({el: h.querySelector(".seccnt"), items: sec.items});
   });
   if(!VIS.length){
-    root.innerHTML = '<div class="empty">'+(filter==="forgot" ? t("emptyForgot") : t("emptyOther"))+'</div>';
+    root.innerHTML = '<div class="empty">⛰️ '+(filter==="forgot" ? t("emptyForgot") : t("emptyOther"))+'</div>';
   }
   if(cur >= VIS.length) cur = 0;
   syncAllMarks();
@@ -824,7 +847,7 @@ function setDay(d){
   } else {
     $("routine").innerHTML = fmt("routineCum",{tot:tot, n:day+1});
   }
-  $("resetBtn").textContent = t("reset")+" "+(day+1);
+  $("resetBtn").innerHTML = "&#8634; "+t("reset")+" "+(day+1);
   renderGrid();
   renderMountain();
   save();
@@ -973,11 +996,19 @@ $("autoBtn").onclick = ()=>{
   if(autoSpeak) speakCur();
 };
 $("themeBtn").onclick = ()=>{ theme = theme==="dark" ? "light" : "dark"; applyTheme(); save(); };
-$("langBtn").onclick = ()=>{
-  lang = lang==="nl" ? "en" : "nl";
+function setLang(l){
+  if(lang===l) return;
+  lang = l;
   applyLang();
   document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
   setDay(day);
+  save();
+}
+document.querySelectorAll("#langSeg .segb").forEach(b=>{ b.onclick = ()=> setLang(b.dataset.lang); });
+$("idxBtn").onclick = ()=>{
+  showIdx = !showIdx;
+  document.body.classList.toggle("show-idx", showIdx);
+  applyLang();
   save();
 };
 $("helpBtn").onclick = openHelp;
@@ -989,6 +1020,7 @@ document.querySelectorAll(".scbtn").forEach(b=>{ b.onclick = ()=> setScope(b.dat
 
 async function init(){
   await load();
+  document.body.classList.toggle("show-idx", showIdx);
   applyLang();
   document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
   setDay(day);
