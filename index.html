@@ -24,6 +24,9 @@
   --activebg:#0F2557;
   --activefg:#FFFFFF;
   --legbg:rgba(247,248,245,.92);
+  --shadow-s:0 1px 2px rgba(15,37,87,.06);
+  --shadow-h:0 4px 12px rgba(31,79,163,.14);
+  --shadow-sheet:0 -10px 34px rgba(8,12,30,.30);
 }
 [data-theme="dark"]{
   --paper:#0E1220;
@@ -41,8 +44,14 @@
   --activebg:#E9EEF8;
   --activefg:#0E1220;
   --legbg:rgba(14,18,32,.9);
+  --shadow-s:none;
+  --shadow-h:0 4px 14px rgba(0,0,0,.5);
+  --shadow-sheet:0 -10px 34px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:4px;z-index:100;
+  background:linear-gradient(90deg,#AE1C28 0 33.4%,#F5F6F2 33.4% 66.7%,#21468B 66.7% 100%)}
+button:focus-visible{outline:2px solid var(--tulip);outline-offset:2px}
 html,body{height:100%}
 body{
   background:var(--paper);
@@ -71,6 +80,9 @@ header{
 .totals .big span{color:var(--green)}
 .totals .sub{font-size:12px;font-weight:500;color:var(--muted);font-family:'Inter'}
 
+.progress{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 2px}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--delft),var(--green));border-radius:99px}
+
 /* ---------- mountain strip ---------- */
 .mountain{
   display:flex;align-items:flex-end;gap:5px;
@@ -95,16 +107,25 @@ header{
 .peak.active .lbl{color:var(--tulip);font-weight:700}
 .peak.active .bar{border-color:var(--tulip);border-width:2px;box-shadow:0 0 0 2px rgba(232,89,12,.18)}
 .peak:focus-visible{outline:2px solid var(--tulip);outline-offset:2px}
+.peak:hover .bar{border-color:var(--delft)}
+.mountain::-webkit-scrollbar{height:6px}
+.mountain::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+.mountain::-webkit-scrollbar-thumb:hover{background:var(--delft)}
 
 /* ---------- day header ---------- */
-.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:20px 0 4px}
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 16px 12px;margin-top:16px;box-shadow:var(--shadow-s)}
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 0 4px}
 .dayhead h2{font-family:'Archivo';font-weight:900;font-size:clamp(20px,3vw,28px);letter-spacing:-.01em}
 .dayhead h2 em{font-style:normal;color:var(--delft)}
 .routine{font-size:12.5px;color:var(--muted)}
 .routine b{color:var(--tulip)}
 .daymeta{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--muted)}
-.daymeta .g{color:var(--green);font-weight:600}
-.daymeta .r{color:var(--red);font-weight:600}
+.daymeta .g,.daymeta .r{display:inline-flex;align-items:center;gap:6px;
+  padding:3px 11px;border-radius:99px;font-weight:600;font-size:12px}
+.daymeta .g{background:var(--green-bg);color:var(--green)}
+.daymeta .r{background:var(--red-bg);color:var(--red)}
+.daymeta .g::before,.daymeta .r::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .reset{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;
   font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit}
 .reset:hover{border-color:var(--red);color:var(--red)}
@@ -117,7 +138,9 @@ header{
 .card{
   background:var(--card);
   border:1.5px solid var(--line);
-  border-radius:8px;
+  border-radius:10px;
+  box-shadow:var(--shadow-s);
+  touch-action:manipulation;
   padding:13px 10px 12px;
   font-family:'Archivo';font-weight:700;font-size:16.5px;letter-spacing:-.01em;
   text-align:center;cursor:pointer;user-select:none;
@@ -132,7 +155,12 @@ header{
 .card.g .idx{color:var(--green)}
 .card.r .idx{color:var(--red)}
 body:not(.show-idx) .card .idx{display:none}
-.card:not(.g):not(.r):hover{border-color:var(--delft)}
+.card:not(.g):not(.r):hover{border-color:var(--delft);box-shadow:var(--shadow-h);transform:translateY(-1px)}
+.card:active{transform:translateY(0);box-shadow:var(--shadow-s)}
+.card.g::after{content:"\2713";position:absolute;top:4px;right:7px;font-family:'Inter';
+  font-size:10px;font-weight:700;color:var(--green)}
+.card.r::after{content:"\2717";position:absolute;top:4px;right:7px;font-family:'Inter';
+  font-size:10px;font-weight:700;color:var(--red)}
 .card{scroll-margin-bottom:var(--sheetpad,0px);scroll-margin-top:6px}
 
 /* ---------- popup / bottom sheet ---------- */
@@ -141,9 +169,13 @@ body:not(.show-idx) .card .idx{display:none}
   background:var(--sheetbg);color:#F2F5FB;
   transform:translateY(102%);
   border-top:4px solid var(--tulip);
+  border-radius:16px 16px 0 0;
+  box-shadow:var(--shadow-sheet);
   padding:18px 22px calc(16px + env(safe-area-inset-bottom));
 }
 .sheet.open{transform:translateY(0)}
+.sheet::before{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:38px;height:4px;border-radius:99px;background:rgba(255,255,255,.22)}
 .sheet-inner{max-width:1180px;margin:0 auto;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
 .sheet .word{font-family:'Archivo';font-weight:900;font-size:clamp(24px,4vw,34px);letter-spacing:-.01em;min-width:200px}
 .sheet .pos{display:inline-block;font-family:'Inter';font-size:10.5px;font-weight:600;
@@ -177,8 +209,17 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
 .legend .kf kbd{border-color:var(--red);color:var(--red)}
 .legend .kd kbd{border-color:var(--delft);color:var(--delft)}
 
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,10px);z-index:90;
+  background:var(--sheetbg);color:#F2F5FB;border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;padding:10px 16px;font-size:13px;font-weight:500;
+  opacity:0;pointer-events:none;max-width:min(90vw,420px);text-align:center;
+  box-shadow:var(--shadow-sheet)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
 .storage-note{font-size:11.5px;color:var(--muted);padding:8px 0 0}
 .storage-note.err{color:var(--red)}
+.tip{margin-top:9px;font-size:12.5px;color:var(--delft);background:rgba(31,79,163,.07);
+  border:1px dashed var(--delft);border-radius:8px;padding:7px 11px}
 
 
 /* ---------- modes & sections ---------- */
@@ -264,12 +305,19 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
   #btnF{order:2}
   #btnSpeak{order:3}
   #btnX{order:4}
-  .sbtn{text-align:center;padding:11px 10px}
+  .sbtn{text-align:center;padding:11px 10px;min-height:44px}
+  .mbtn,.fbtn,.scbtn,.reset{min-height:36px}
+  .toast{bottom:16px}
   .legend{display:none}
 }
 @media (prefers-reduced-motion:no-preference){
   .sheet{transition:transform .12s ease-out}
-  .card{transition:background .08s,border-color .08s}
+  .card{transition:background .08s,border-color .08s,box-shadow .1s,transform .1s}
+  .peak{transition:transform .1s}
+  .peak:hover{transform:translateY(-2px)}
+  .peak .fill{transition:height .18s ease-out}
+  .progress-fill{transition:width .25s ease-out}
+  .toast{transition:opacity .15s,transform .15s}
 }
 </style>
 </head>
@@ -292,9 +340,11 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
       <button class="theme" id="themeBtn" title="Licht / donker &middot; Light / dark">&#127769;</button>
     </div>
   </header>
+  <div class="progress" aria-hidden="true"><div class="progress-fill" id="progFill"></div></div>
 
   <nav class="mountain" id="mountain" aria-label="Dagen"></nav>
 
+  <div class="panel">
   <div class="dayhead">
     <h2 id="dayTitle">Dag 1 — <em>…</em></h2>
     <div class="daymeta">
@@ -308,6 +358,7 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
     </div>
   </div>
   <div class="routine" id="routine"></div>
+  <div class="tip" id="tip" hidden></div>
   <div class="modes">
     <button class="scbtn active" data-sc="cum" id="scCum">Dag 1&ndash;1</button>
     <button class="scbtn" data-sc="solo" id="scSolo">Alleen dag 1</button>
@@ -323,8 +374,12 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
   <div class="storage-note" id="storageNote"></div>
   <div class="storage-note" id="ttsNote"></div>
 
+  </div>
+
   <main id="sections"></main>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="legend">
   <span class="kg"><kbd>G</kbd> <span data-i18n="lgKnown">gekend</span></span>
@@ -374,9 +429,10 @@ const DATA = []; // populated by data chunks below
 let day = 0, cur = 0, mode = "order";        // order | sday | sall
 let filter = "all";                           // all | forgot | unmarked
 let scope = "cum";                            // cum (day 1..N) | solo (day N only)
-let lang = "en";                              // ui language: nl | en
+let lang = "nl";                              // ui language: nl | en
 let autoSpeak = false;
 let showIdx = false;                          // card numbers hidden by default
+let tipSeen = false;
 let marks = {};                               // "d-i" -> 1 green | 2 red
 let mem = false, saveTimer = null;
 let VIS = [], ELS = [], SECCOUNTS = [];
@@ -409,6 +465,7 @@ nl:{
   reset:"reset dag", export:"export", import:"import",
   auto:"auto-uitspraak", on:"aan", off:"uit",
   guide:"Gids", numbers:"nummers",
+  tip:"Tip: dubbelklik een kaartje (of druk D) voor de definitie \u00b7 G = gekend \u00b7 F = vergeten \u00b7 klik op lege ruimte om te sluiten",
   known2:"gekend", forgot2:"vergeten", words:"woorden",
   neww:"nieuw", review:"herhaling", allMixed:"Alle {n} woorden \u2014 gemengd",
   routineD1:"De berg tot hier: <b>30 woorden</b>. Morgen: dag 1 herhalen + dag 2 leren.",
@@ -438,6 +495,7 @@ en:{
   reset:"reset day", export:"export", import:"import",
   auto:"auto-speak", on:"on", off:"off",
   guide:"Guide", numbers:"numbers",
+  tip:"Tip: double-click a card (or press D) for the definition \u00b7 G = known \u00b7 F = forgot \u00b7 click empty space to close",
   known2:"known", forgot2:"forgotten", words:"words",
   neww:"new", review:"review", allMixed:"All {n} words \u2014 mixed",
   routineD1:"The mountain so far: <b>30 words</b>. Tomorrow: review day 1 + learn day 2.",
@@ -474,6 +532,7 @@ nl: `<h2>De Vocabberg \u2014 gids</h2>
 <li><kbd>G</kbd> gekend (groen) \u00b7 <kbd>F</kbd> vergeten (rood) \u00b7 <kbd>X</kbd> wissen</li>
 <li><kbd>D</kbd> of <kbd>Enter</kbd> definitie \u00b7 <kbd>P</kbd> uitspraak \u00b7 <kbd>S</kbd> schudden</li>
 <li>Pijltjes: navigeren \u00b7 <kbd>[</kbd> <kbd>]</kbd> dag wisselen \u00b7 <kbd>Esc</kbd> sluiten</li>
+<li>Klik = selecteren \u00b7 <b>dubbelklik</b> = definitie \u00b7 klik op lege ruimte = definitie sluiten</li>
 </ul>
 <h3>Weergaven & filters</h3>
 <p><b>Op volgorde</b> = originele volgorde. <b>Schud per dag</b> = secties blijven (30-30-30) maar elk gehusseld. <b>Alles gemengd</b> = alles door elkaar; het kaartje toont dan dag.nummer (bijv. 2.14). Filter <b>Alleen vergeten</b> om alleen je rode woorden te drillen; leeg = alles gekend.</p>
@@ -500,6 +559,7 @@ en: `<h2>De Vocabberg \u2014 guide</h2>
 <li><kbd>G</kbd> known (green) \u00b7 <kbd>F</kbd> forgot (red) \u00b7 <kbd>X</kbd> clear</li>
 <li><kbd>D</kbd> or <kbd>Enter</kbd> definition \u00b7 <kbd>P</kbd> pronounce \u00b7 <kbd>S</kbd> shuffle</li>
 <li>Arrow keys: navigate \u00b7 <kbd>[</kbd> <kbd>]</kbd> switch day \u00b7 <kbd>Esc</kbd> close</li>
+<li>Click = select \u00b7 <b>double-click</b> = definition \u00b7 click empty space = close definition</li>
 </ul>
 <h3>Views & filters</h3>
 <p><b>In order</b> = original order. <b>Shuffle per day</b> = sections stay (30-30-30) but each is shuffled. <b>All mixed</b> = everything mixed; cards then show day.number (e.g. 2.14). Filter <b>Forgotten only</b> to drill just your red words; empty = you know them all.</p>
@@ -533,6 +593,8 @@ function applyLang(){
   $("idxBtn").classList.toggle("on", showIdx);
   document.querySelectorAll("#langSeg .segb").forEach(b=> b.classList.toggle("active", b.dataset.lang===lang));
   $("helpBody").innerHTML = HELP[lang];
+  $("tip").hidden = tipSeen;
+  if(!tipSeen) $("tip").textContent = t("tip");
   if(mem){ $("storageNote").textContent = t("storageNone"); }
 }
 
@@ -557,8 +619,9 @@ function applyState(s){
   if(s.scope) scope = s.scope;
   if(typeof s.autoSpeak === "boolean") autoSpeak = s.autoSpeak;
   if(typeof s.showIdx === "boolean") showIdx = s.showIdx;
+  if(typeof s.tipSeen === "boolean") tipSeen = s.tipSeen;
 }
-function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak, showIdx:showIdx}); }
+function snapshot(){ return JSON.stringify({marks:marks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak, showIdx:showIdx, tipSeen:tipSeen}); }
 async function load(){
   try{
     if(backend==="artifact"){
@@ -644,7 +707,9 @@ let NLVOICE = null;
 function pickVoice(){
   if(!window.speechSynthesis) return;
   const vs = speechSynthesis.getVoices();
-  NLVOICE = vs.find(v=> /nl[-_]NL/i.test(v.lang))
+  NLVOICE = vs.find(v=> /google/i.test(v.name) && /nl[-_]NL/i.test(v.lang))
+         || vs.find(v=> /google/i.test(v.name) && v.lang && v.lang.toLowerCase().startsWith("nl"))
+         || vs.find(v=> /nl[-_]NL/i.test(v.lang))
          || vs.find(v=> v.lang && v.lang.toLowerCase().startsWith("nl"))
          || vs.find(v=> /nederlands|dutch/i.test(v.name))
          || null;
@@ -681,6 +746,14 @@ function speak(txt, retried){
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   }catch(e){ /* no voice available */ }
+}
+let toastTimer = null;
+function showToast(msg){
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove("show"), 1900);
 }
 function speakCur(){
   const it = VIS[cur];
@@ -791,7 +864,8 @@ function renderGrid(){
       c.innerHTML = '<span class="idx">'+tagNo+'</span>' +
         (p[0] ? '<span class="art '+p[0]+'">'+p[0]+'</span>' : '<span class="art">&nbsp;</span>') +
         p[1];
-      c.onclick = ()=>{ go(v); openSheet(); };
+      c.onclick = ()=>{ go(v); };
+      c.ondblclick = ()=>{ go(v); openSheet(); };
       ELS.push(c);
       grid.appendChild(c);
     });
@@ -830,6 +904,7 @@ function syncAllMarks(){
   const tg = totalGreen();
   $("totGreen").textContent = tg;
   $("totPct").textContent = Math.round(tg/1020*100)+"%";
+  $("progFill").style.width = (tg/1020*100).toFixed(1)+"%";
 }
 function syncCursor(scroll=true){
   ELS.forEach((el,v)=> el.classList.toggle("cur", v===cur));
@@ -916,6 +991,7 @@ function openSheet(){
   fillSheet();
   $("sheet").classList.add("open");
   sheetOpen = true;
+  if(!tipSeen){ tipSeen = true; $("tip").hidden = true; save(); }
   requestAnimationFrame(()=>{
     updateSheetPad();
     if(ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
@@ -992,7 +1068,7 @@ $("resetBtn").onclick = ()=>{
 };
 $("expBtn").onclick = async ()=>{
   const code = snapshot();
-  try{ await navigator.clipboard.writeText(code); alert(t("expOk")); }
+  try{ await navigator.clipboard.writeText(code); showToast(t("expOk")); }
   catch(e){ prompt(t("expCopy"), code); }
 };
 $("impBtn").onclick = ()=>{
@@ -1006,8 +1082,8 @@ $("impBtn").onclick = ()=>{
     document.querySelectorAll(".scbtn").forEach(b=> b.classList.toggle("active", b.dataset.sc===scope));
     setDay(day);
     save();
-    alert(t("impOk"));
-  }catch(e){ alert(t("impBad")); }
+    showToast(t("impOk"));
+  }catch(e){ showToast(t("impBad")); }
 };
 $("autoBtn").onclick = ()=>{
   autoSpeak = !autoSpeak;
@@ -1034,6 +1110,11 @@ $("idxBtn").onclick = ()=>{
 $("helpBtn").onclick = openHelp;
 $("helpClose").onclick = closeHelp;
 $("helpOverlay").onclick = e=>{ if(e.target===$("helpOverlay")) closeHelp(); };
+document.addEventListener("click", e=>{
+  if(!sheetOpen) return;
+  if(e.target.closest(".sheet") || e.target.closest(".card")) return;
+  closeSheet();
+});
 document.querySelectorAll(".mbtn").forEach(b=>{ b.onclick = ()=> setMode(b.dataset.m); });
 document.querySelectorAll(".fbtn").forEach(b=>{ b.onclick = ()=> setFilter(b.dataset.f); });
 document.querySelectorAll(".scbtn").forEach(b=>{ b.onclick = ()=> setScope(b.dataset.sc); });
