@@ -350,8 +350,7 @@ kbd{font-family:'Archivo';font-weight:700;font-size:11px;background:var(--card);
     <div class="daymeta">
       <span class="g" id="dayG">0 gekend</span>
       <span class="r" id="dayR">0 vergeten</span>
-      <button class="reset" id="resetBtn" title="Wis markeringen van deze dag">reset dag</button>
-      <button class="reset" id="resetThroughBtn" title="Reset dagen 1 t/m de huidige dag alleen voor vandaag">reset 1–1 vandaag</button>
+      <button class="reset" id="resetBtn" title="Wis de opgeslagen oefenvoortgang van oefendag 1 t/m 1">reset 1–1</button>
       <button class="reset" id="expBtn" title="Kopieer je voortgang als code (voor ander apparaat of back-up)">export</button>
       <button class="reset" id="impBtn" title="Plak een voortgang-code van een ander apparaat">import</button>
       <button class="reset tgl" id="idxBtn" title="Toon/verberg nummers op kaartjes">#</button>
@@ -434,10 +433,8 @@ let lang = "nl";                              // ui language: nl | en
 let autoSpeak = false;
 let showIdx = false;                          // card numbers hidden by default
 let tipSeen = false;
-let marks = {};                               // Long-term marks: "d-i" -> 1 green | 2 red
-let dailyResetDate = "";                      // Temporary practice reset, active for this local date only
-let dailyResetThrough = -1;                    // Inclusive day index cleared by the temporary reset
-let dailyMarks = {};                           // Marks made during today's temporary reset session
+let marks = {};                               // Active practice day: "d-i" -> 1 green | 2 red
+let practiceMarks = {};                        // Practice day index -> its independent cumulative marks
 let mem = false, saveTimer = null;
 let VIS = [], ELS = [], SECCOUNTS = [];
 let theme = null;
@@ -445,18 +442,6 @@ let theme = null;
 const $ = id => document.getElementById(id);
 const KEY = "vocabberg_v1";
 const key = (d,i) => d + "-" + i;
-const todayKey = () => {
-  const d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-};
-function dailyResetActive(){
-  return dailyResetDate === todayKey() && dailyResetThrough >= 0;
-}
-function getMark(d,i){
-  const k = key(d,i);
-  if(dailyResetActive() && d <= dailyResetThrough) return dailyMarks[k];
-  return marks[k];
-}
 
 const T_EN = [
 "survival: questions & greetings","pronouns & to be / to have","numbers 0-20 & quantity",
@@ -478,12 +463,12 @@ nl:{
   day:"Dag", soloOnly:"Alleen dag",
   mOrder:"Op volgorde", mSday:"Schud per dag", mSall:"Alles gemengd",
   fAll:"Alles", fForgot:"Alleen vergeten", fUnmarked:"Alleen ongemarkeerd",
-     reset:"reset dag", resetThrough:"reset 1–{n} vandaag",
-   resetThroughTitle:"Reset dagen 1 t/m de huidige dag alleen voor vandaag",
-   resetThroughConfirm:"Markeringen van dag 1 t/m {n} alleen voor vandaag verbergen? Je opgeslagen voortgang komt morgen terug.",
-   resetThroughDone:"Dag 1 t/m {n} is voor vandaag opnieuw ingesteld. Je opgeslagen voortgang komt morgen terug.",
-   export:"export", import:"import",
-   auto:"auto-uitspraak", on:"aan", off:"uit",
+  reset:"reset dag", resetRange:"reset 1–{n}",
+  resetRangeTitle:"Wis de opgeslagen oefenvoortgang van oefendag 1 t/m {n}",
+  resetRangeConfirm:"Alle opgeslagen oefenvoortgang van oefendag 1 t/m {n} wissen?",
+  resetRangeDone:"Oefenvoortgang van oefendag 1 t/m {n} gewist.",
+  export:"export", import:"import",
+  auto:"auto-uitspraak", on:"aan", off:"uit",
   guide:"Gids", numbers:"nummers",
   tip:"Tip: dubbelklik een kaartje (of druk D) voor de definitie \u00b7 G = gekend \u00b7 F = vergeten \u00b7 klik op lege ruimte om te sluiten",
   known2:"gekend", forgot2:"vergeten", words:"woorden",
@@ -512,12 +497,12 @@ en:{
   day:"Day", soloOnly:"Only day",
   mOrder:"In order", mSday:"Shuffle per day", mSall:"All mixed",
   fAll:"All", fForgot:"Forgotten only", fUnmarked:"Unmarked only",
-     reset:"reset day", resetThrough:"reset 1–{n} today",
-   resetThroughTitle:"Reset days 1 through the selected day for today only",
-   resetThroughConfirm:"Temporarily clear marks for days 1 through {n}? Your saved progress will return tomorrow.",
-   resetThroughDone:"Days 1 through {n} reset for today. Your saved progress will return tomorrow.",
-   export:"export", import:"import",
-   auto:"auto-speak", on:"on", off:"off",
+  reset:"reset day", resetRange:"reset 1–{n}",
+  resetRangeTitle:"Clear saved practice progress for practice days 1 through {n}",
+  resetRangeConfirm:"Clear all saved practice progress for practice days 1 through {n}?",
+  resetRangeDone:"Practice progress for days 1 through {n} cleared.",
+  export:"export", import:"import",
+  auto:"auto-speak", on:"on", off:"off",
   guide:"Guide", numbers:"numbers",
   tip:"Tip: double-click a card (or press D) for the definition \u00b7 G = known \u00b7 F = forgot \u00b7 click empty space to close",
   known2:"known", forgot2:"forgotten", words:"words",
@@ -609,7 +594,8 @@ function applyLang(){
   $("btnG").innerHTML = t("knownBtn")+" &middot; G";
   $("btnF").innerHTML = t("forgotBtn")+" &middot; F";
   $("btnX").innerHTML = t("clearBtn")+" &middot; X";
-  $("resetThroughBtn").title = t("resetThroughTitle");
+  $("resetBtn").innerHTML = "&#8634; "+fmt("resetRange",{n:day+1});
+  $("resetBtn").title = fmt("resetRangeTitle",{n:day+1});
   $("expBtn").innerHTML = "&#8593; "+t("export");
   $("impBtn").innerHTML = "&#8595; "+t("import");
   $("autoBtn").innerHTML = "&#128266; "+t("auto")+": "+(autoSpeak ? t("on") : t("off"));
@@ -637,16 +623,23 @@ function lsOK(){
 }
 const backend = window.storage ? "artifact" : (lsOK() ? "local" : "none");
 function applyState(s){
-  marks = s.marks || {};
-  dailyResetDate = s.dailyResetDate || "";
-  dailyResetThrough = Number.isInteger(s.dailyResetThrough) ? s.dailyResetThrough : -1;
-  dailyMarks = s.dailyMarks || {};
-  if(dailyResetDate && dailyResetDate !== todayKey()){
-    dailyResetDate = "";
-    dailyResetThrough = -1;
-    dailyMarks = {};
+  day = Math.max(0, Math.min(Number.isInteger(s.day) ? s.day : 0, DATA.length-1));
+  if(s.practiceMarks && typeof s.practiceMarks === "object" && !Array.isArray(s.practiceMarks)){
+    practiceMarks = s.practiceMarks;
+    // Use the selected practice day's saved marks, never another day's marks.
+    marks = Object.prototype.hasOwnProperty.call(practiceMarks, String(day))
+      ? { ...practiceMarks[String(day)] }
+      : {};
+    // If an imported new-format state has only the active marks field, retain it for this day.
+    if(!Object.prototype.hasOwnProperty.call(practiceMarks, String(day)) && s.marks && Object.keys(s.marks).length){
+      marks = { ...s.marks };
+      practiceMarks[String(day)] = { ...marks };
+    }
+  } else {
+    // Migrate legacy shared progress into the currently selected practice day only.
+    marks = { ...(s.marks || {}) };
+    practiceMarks = { [String(day)]: { ...marks } };
   }
-  day = Math.min(s.day || 0, DATA.length-1);
   if(s.theme) theme = s.theme;
   if(s.lang) lang = s.lang;
   if(s.scope) scope = s.scope;
@@ -654,7 +647,13 @@ function applyState(s){
   if(typeof s.showIdx === "boolean") showIdx = s.showIdx;
   if(typeof s.tipSeen === "boolean") tipSeen = s.tipSeen;
 }
-function snapshot(){ return JSON.stringify({marks:marks, dailyResetDate:dailyResetDate, dailyResetThrough:dailyResetThrough, dailyMarks:dailyMarks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak, showIdx:showIdx, tipSeen:tipSeen}); }
+function persistActiveMarks(){
+  practiceMarks[String(day)] = { ...marks };
+}
+function snapshot(){
+  persistActiveMarks();
+  return JSON.stringify({marks:marks, practiceMarks:practiceMarks, day:day, theme:theme, lang:lang, scope:scope, autoSpeak:autoSpeak, showIdx:showIdx, tipSeen:tipSeen});
+}
 async function load(){
   try{
     if(backend==="artifact"){
@@ -796,13 +795,12 @@ function speakCur(){
 /* ================= stats ================= */
 function totalGreen(){
   let n=0;
-  for(let d=0;d<DATA.length;d++)
-    for(let i=0;i<DATA[d].w.length;i++) if(getMark(d,i)===1) n++;
+  for(const k in marks) if(marks[k]===1) n++;
   return n;
 }
 function dayGreen(d){
   let g=0;
-  for(let i=0;i<DATA[d].w.length;i++) if(getMark(d,i)===1) g++;
+  for(let i=0;i<DATA[d].w.length;i++) if(marks[key(d,i)]===1) g++;
   return g;
 }
 
@@ -827,9 +825,12 @@ function renderMountain(){
   }
   const act = el.querySelector(".peak.active");
   if(act){
-    const peakLeft = act.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft;
-    const left = Math.max(0, peakLeft - (el.clientWidth - act.offsetWidth) / 2);
-    el.scrollLeft = left; // Horizontal-only: never move the page vertically when a word is marked.
+    // Scroll only the day strip horizontally. scrollIntoView() also scrolls the page
+    // vertically, which made every keyboard mark jump back to the top of the page.
+    const containerRect = el.getBoundingClientRect();
+    const activeRect = act.getBoundingClientRect();
+    const delta = activeRect.left - containerRect.left - (containerRect.width - activeRect.width) / 2;
+    el.scrollLeft = Math.max(0, el.scrollLeft + delta);
   }
 }
 
@@ -842,7 +843,7 @@ function shuffleArr(a){
   return a;
 }
 function passFilter(it){
-  const m = getMark(it.d,it.i);
+  const m = marks[key(it.d,it.i)];
   if(filter==="forgot") return m===2;
   if(filter==="unmarked") return m===undefined;
   return true;
@@ -920,21 +921,21 @@ function renderGrid(){
 }
 function syncAllMarks(){
   VIS.forEach((it,v)=>{
-    const m = getMark(it.d,it.i);
+    const m = marks[key(it.d,it.i)];
     ELS[v].classList.toggle("g", m===1);
     ELS[v].classList.toggle("r", m===2);
   });
   SECCOUNTS.forEach(sc=>{
     let g=0,r=0;
     sc.items.forEach(it=>{
-      const m = getMark(it.d,it.i);
+      const m = marks[key(it.d,it.i)];
       if(m===1) g++; else if(m===2) r++;
     });
     sc.el.textContent = g+" \u2713 \u00b7 "+r+" \u2717 \u00b7 "+sc.items.length+" "+t("words");
   });
   let g=0,r=0;
   VIS.forEach(it=>{
-    const m = getMark(it.d,it.i);
+    const m = marks[key(it.d,it.i)];
     if(m===1) g++; else if(m===2) r++;
   });
   $("dayG").textContent = g+" "+t("known2");
@@ -944,18 +945,9 @@ function syncAllMarks(){
   $("totPct").textContent = Math.round(tg/1020*100)+"%";
   $("progFill").style.width = (tg/1020*100).toFixed(1)+"%";
 }
-function scrollCardIntoView(el){
-  if(!el) return;
-  const r = el.getBoundingClientRect();
-  const topLimit = 12;
-  const bottomReserve = sheetOpen ? ($("sheet").offsetHeight + 12) : (window.innerWidth > 640 ? 48 : 12);
-  const bottomLimit = window.innerHeight - bottomReserve;
-  if(r.top < topLimit) window.scrollBy({top:r.top-topLimit, behavior:"auto"});
-  else if(r.bottom > bottomLimit) window.scrollBy({top:r.bottom-bottomLimit, behavior:"auto"});
-}
 function syncCursor(scroll=true){
   ELS.forEach((el,v)=> el.classList.toggle("cur", v===cur));
-  if(scroll && ELS[cur]) scrollCardIntoView(ELS[cur]);
+  if(scroll && ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
   if(sheetOpen) fillSheet();
 }
 function go(v){
@@ -965,7 +957,11 @@ function go(v){
 }
 
 function setDay(d){
-  day = Math.max(0, Math.min(DATA.length-1, d));
+  const nextDay = Math.max(0, Math.min(DATA.length-1, d));
+  // Save this practice day's marks before switching to another independent memory.
+  persistActiveMarks();
+  day = nextDay;
+  marks = { ...(practiceMarks[String(day)] || {}) };
   cur = 0;
   closeSheet();
   const tot = (day+1)*30;
@@ -980,8 +976,8 @@ function setDay(d){
   } else {
     $("routine").innerHTML = fmt("routineCum",{tot:tot, n:day+1});
   }
-  $("resetBtn").innerHTML = "&#8634; "+t("reset")+" "+(day+1);
-  $("resetThroughBtn").innerHTML = "&#8634; "+fmt("resetThrough",{n:day+1});
+  $("resetBtn").innerHTML = "&#8634; "+fmt("resetRange",{n:day+1});
+  $("resetBtn").title = fmt("resetRangeTitle",{n:day+1});
   renderGrid();
   renderMountain();
   save();
@@ -1042,7 +1038,7 @@ function openSheet(){
   if(!tipSeen){ tipSeen = true; $("tip").hidden = true; save(); }
   requestAnimationFrame(()=>{
     updateSheetPad();
-    if(ELS[cur]) scrollCardIntoView(ELS[cur]);
+    if(ELS[cur]) ELS[cur].scrollIntoView({block:"nearest"});
   });
 }
 function closeSheet(){
@@ -1062,9 +1058,7 @@ function mark(v){
   const it = VIS[cur];
   if(!it) return;
   const k = key(it.d, it.i);
-  const isTemporary = dailyResetActive() && it.d <= dailyResetThrough;
-  const target = isTemporary ? dailyMarks : marks;
-  if(v===0) delete target[k]; else target[k] = v;
+  if(v===0) delete marks[k]; else marks[k] = v;
   syncAllMarks();
   renderMountain();
   save();
@@ -1079,63 +1073,32 @@ function cols(){
   return getComputedStyle(g).gridTemplateColumns.split(" ").length;
 }
 
-function isTextEntryTarget(target){
-  return !!(target && target.closest && target.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""]'));
-}
-function alignCursorToViewport(){
-  if(!ELS.length) return false;
-  const bottomReserve = sheetOpen ? ($("sheet").offsetHeight + 12) : (window.innerWidth > 640 ? 48 : 12);
-  const bottomLimit = window.innerHeight - bottomReserve;
-  const current = ELS[cur];
-  if(current){
-    const r = current.getBoundingClientRect();
-    if(r.bottom > 0 && r.top < bottomLimit) return true;
-  }
-  // If the user manually scrolled away from the active card, start from the first visible card
-  // instead of jumping back to the previous (often first) card near the top of the page.
-  let best = -1, bestTop = Infinity;
-  for(let i=0;i<ELS.length;i++){
-    const r = ELS[i].getBoundingClientRect();
-    if(r.bottom <= 0 || r.top >= bottomLimit) continue;
-    const top = Math.max(0, r.top);
-    if(top < bestTop){ bestTop = top; best = i; }
-  }
-  if(best < 0) return false;
-  cur = best;
-  syncCursor(false);
-  return true;
-}
 document.addEventListener("keydown", e=>{
   if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const target = e.target;
+  if(target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
   if(helpOpen){
-    if(e.key === "Escape"){ closeHelp(); e.preventDefault(); }
+    if(e.key==="Escape") closeHelp();
     return;
   }
-  if(isTextEntryTarget(e.target)) return;
-  const k = e.key.toLowerCase();
   const n = VIS.length;
-  const cardKeys = ["g","f","x","d","s","p","enter","arrowright","l","arrowleft","h","arrowdown","j","arrowup","k"];
-  if(cardKeys.includes(k) && !alignCursorToViewport()) return;
-  if(!n && k !== "[" && k !== "]" && k !== "escape") return;
-  let handled = true;
-  switch(k){
+  if(!n && e.key.toLowerCase()!=="[" && e.key.toLowerCase()!=="]") return;
+  switch(e.key.toLowerCase()){
     case "g": mark(1); break;
     case "f": mark(2); break;
     case "x": mark(0); break;
     case "d": toggleSheet(); break;
     case "s": setMode(mode==="order" ? "sday" : mode); break;
     case "p": speakCur(); break;
-    case "enter": toggleSheet(); break;
+    case "enter": toggleSheet(); e.preventDefault(); break;
     case "escape": closeSheet(); break;
-    case "arrowright": case "l": if(n) go((cur+1)%n); break;
-    case "arrowleft": case "h": if(n) go((cur-1+n)%n); break;
-    case "arrowdown": case "j": if(n) go(Math.min(n-1,cur+cols())); break;
-    case "arrowup": case "k": if(n) go(Math.max(0,cur-cols())); break;
+    case "arrowright": case "l": go((cur+1)%n); e.preventDefault(); break;
+    case "arrowleft": case "h": go((cur-1+n)%n); e.preventDefault(); break;
+    case "arrowdown": case "j": go(Math.min(n-1,cur+cols())); e.preventDefault(); break;
+    case "arrowup": case "k": go(Math.max(0,cur-cols())); e.preventDefault(); break;
     case "[": setDay(day-1); break;
     case "]": setDay(day+1); break;
-    default: handled = false;
   }
-  if(handled) e.preventDefault();
 });
 
 $("btnG").onclick = ()=>mark(1);
@@ -1145,23 +1108,14 @@ $("btnSpeak").onclick = speakCur;
 $("sheetClose").onclick = closeSheet;
 $("shEx").onclick = ()=>{ if(lastExNL) speak(lastExNL); };
 $("resetBtn").onclick = ()=>{
-  if(!confirm(fmt("resetConfirm",{n:day+1}))) return;
-  if(dailyResetActive() && day <= dailyResetThrough){
-    DATA[day].w.forEach((w,i)=> delete dailyMarks[key(day,i)]);
-  } else {
-    DATA[day].w.forEach((w,i)=> delete marks[key(day,i)]);
-  }
-  renderGrid(); renderMountain(); save();
-};
-$("resetThroughBtn").onclick = ()=>{
-  if(!confirm(fmt("resetThroughConfirm",{n:day+1}))) return;
-  dailyResetDate = todayKey();
-  dailyResetThrough = day;
-  dailyMarks = {};
-  renderGrid();
+  if(!confirm(fmt("resetRangeConfirm",{n:day+1}))) return;
+  for(let d=0; d<=day; d++) delete practiceMarks[String(d)];
+  marks = {};
+  practiceMarks[String(day)] = {};
+  syncAllMarks();
   renderMountain();
   save();
-  showToast(fmt("resetThroughDone",{n:day+1}));
+  showToast(fmt("resetRangeDone",{n:day+1}));
 };
 $("expBtn").onclick = async ()=>{
   const code = snapshot();
